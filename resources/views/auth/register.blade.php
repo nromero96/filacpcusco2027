@@ -162,6 +162,95 @@
 
     <script src="{{asset('bootstrap/js/bootstrap.bundle.min.js')}}"></script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const documentType = document.getElementById('document_type');
+            const documentNumber = document.getElementById('document_number');
+            const form = document.querySelector('form');
+
+            function applyRules() {
+
+                let value = documentNumber.value;
+
+                switch (documentType.value) {
+
+                    case 'DNI':
+                        value = value.replace(/[^0-9]/g, '');
+                        value = value.substring(0, 8);
+                        documentNumber.setAttribute('maxlength', '8');
+                        documentNumber.setAttribute('inputmode', 'numeric');
+                        break;
+
+                    case 'Carnet de extranjería':
+                        value = value.replace(/[^A-Za-z0-9]/g, '');
+                        value = value.toUpperCase();
+                        value = value.substring(0, 12);
+                        documentNumber.setAttribute('maxlength', '12');
+                        break;
+
+                    case 'Pasaporte':
+                        value = value.replace(/[^A-Za-z0-9]/g, '');
+                        value = value.toUpperCase();
+                        value = value.substring(0, 14);
+                        documentNumber.setAttribute('maxlength', '14');
+                        break;
+                }
+
+                documentNumber.value = value;
+            }
+
+            documentType.addEventListener('change', function () {
+                documentNumber.value = '';
+            });
+
+            documentNumber.addEventListener('input', applyRules);
+
+            documentNumber.addEventListener('paste', function () {
+                setTimeout(applyRules, 10);
+            });
+
+            form.addEventListener('submit', function (e) {
+
+                const tipo = documentType.value;
+                const numero = documentNumber.value.trim();
+
+                if (!tipo) {
+                    alert('Seleccione el tipo de documento.');
+                    e.preventDefault();
+                    return;
+                }
+
+                if (tipo === 'DNI') {
+
+                    if (!/^\d{8}$/.test(numero)) {
+                        alert('El DNI debe contener exactamente 8 dígitos.');
+                        e.preventDefault();
+                        return;
+                    }
+
+                } else if (tipo === 'Carnet de extranjería') {
+
+                    if (!/^[A-Z0-9]{9,12}$/.test(numero)) {
+                        alert('El Carnet de Extranjería debe contener entre 9 y 12 caracteres alfanuméricos.');
+                        e.preventDefault();
+                        return;
+                    }
+
+                } else if (tipo === 'Pasaporte') {
+
+                    if (!/^(?=.*[A-Z])(?=.*\d)[A-Z0-9]{6,14}$/.test(numero)) {
+                        alert('El Pasaporte debe contener entre 6 y 14 caracteres, incluyendo al menos una letra y un número.');
+                        e.preventDefault();
+                        return;
+                    }
+
+                }
+
+            });
+
+        });
+        </script>
 
 </body>
 </html>

@@ -214,7 +214,6 @@
                                             <tr>
                                                 <td colspan="7" class="text-center">
                                                     <h6 class="mt-2">{{__("No hay inscripciones registradas")}}</h6>
-                                                    <a href="{{ route('inscriptions.create') }}" class="btn btn-primary mb-4 ms-3 me-3">{{__("Comprar Nuevo")}}</a>
                                                 </td>
                                             </tr>
                                         @else
