@@ -64,7 +64,7 @@
     <div class="container">
         <h2>INSCRIPCIÓN # {{ $datainscription->id }}: <span style="color:green;">Confirmado</span></h2>
         <p>Estimado(a) <b>{{ $userinfo->name }} {{ $userinfo->lastname }} {{ $userinfo->second_lastname }}</b>,</p>
-        <p>Le informamos que su inscripción para la <b>CONGRESO BOLIVARIANO FILACP 2027</b> ha sido confirmada. La jornada se celebrará el sábado 11 de octubre de 2025, en el Hotel Costa del Sol, Golf Trujillo, Calle Los Cocoteros 505 Urb El Golf, en el horario de 8:30 am a 6:30 pm.</p>
+        <p>Le informamos que su inscripción para la <b>CONGRESO BOLIVARIANO DE CIRUGIA PLASTICA FILACP 2027</b> ha sido confirmada. La jornada se celebrará del 4 al 7 de mayo de 2027, en Valle Sagrado, Cusco - Perú.</p>
 
         <!-- Título "Detalle de tu Inscripción" -->
         <h3>Detalle de su inscripción</h3>
