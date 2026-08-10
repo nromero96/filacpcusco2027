@@ -108,7 +108,7 @@
 
         <!-- Recordatorio para ver el proceso de inscripción -->
         <p>Recuerda que puedes ver el proceso de tu inscripción en el siguiente enlace:</p>
-        <p><a href="https://my.congresobolivariano.org/inscripcion/{{ $datainscription->id }}">Ver Proceso de Inscripción</a></p>
+        <p><a href="https://my.bolivarianofilacpcusco2027.org/inscripcion/{{ $datainscription->id }}">Ver Proceso de Inscripción</a></p>
 
         <p><strong style="color:red;"><em>En un plazo de 72 horas enviaremos mensaje confirmando su inscripción.</em><strong></p>
         <!-- Contacto de soporte -->
