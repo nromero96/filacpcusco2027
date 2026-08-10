@@ -156,11 +156,11 @@
                                 <label for="inputSolapin" class="form-label fw-bold mb-0">{{__("Solapín/Gafete")}} <span class="text-danger">*</span> <small class="fw-normal">({{ __("Un nombre y un apellido") }})</small></label>
                                 <div class="d-flex gap-2">
                                     <div class="w-50">
-                                        <input type="text" class="form-control convert_mayus" name="solapin_name" id="inputSolapin" value="{{ old('solapin_name') }}" placeholder="Name" required>
+                                        <input type="text" class="form-control convert_mayus" name="solapin_name" id="inputSolapin" value="{{ old('solapin_name') }}" placeholder="Nombre" required>
                                         {!!$errors->first("solapin_name", "<span class='text-danger'>:message</span>")!!}
                                     </div>
                                     <div class="w-50">
-                                        <input type="text" class="form-control convert_mayus" name="solapin_lastname" id="inputSolapin" value="{{ old('solapin_lastname') }}" placeholder="Lastname" required>
+                                        <input type="text" class="form-control convert_mayus" name="solapin_lastname" id="inputSolapin" value="{{ old('solapin_lastname') }}" placeholder="Apellido" required>
                                         {!!$errors->first("solapin_lastname", "<span class='text-danger'>:message</span>")!!}
                                     </div>
                                 </div>
@@ -337,16 +337,67 @@
                                             </label>
                                         </div>
 
-                                        {{-- <div class="form-check form-check-primary form-check-inline">
+                                        <div class="form-check form-check-primary form-check-inline">
                                             <input class="form-check-input cursor-pointer" type="radio" name="payment_method" value="Tarjeta" id="payment_method_card">
                                             <label class="form-check-label mb-0 cursor-pointer" for="payment_method_card">
                                                 Tarjeta de crédito/débito
                                             </label>
-                                        </div> --}}
+                                        </div>
                                         
                                     </div>
 
                                     <div id="dv_tranfer" class="mt-3">
+
+                                        
+
+                                        <div class="p-3 d-flex justify-content-center"> 
+
+                                            <!-- Contenedor principal más estrecho y con bordes más redondeados -->
+                                            <div class="card shadow-sm rounded-4 border-0 w-100" style="max-width: 400px;">
+                                                <div class="card-body p-3 p-sm-4">
+                                                    
+                                                    <!-- Lista de datos súper compacta -->
+                                                    <ul class="list-group list-group-flush mb-3 text-sm">
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                                                            <span class="text-muted">Beneficiario</span>
+                                                            <span class="fw-bold text-end">ASOCIACION CONGRESO LIMA-PERU</span>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                                                            <span class="text-muted">Banco de Crédito del Perú</span>
+                                                            <span class="fw-bold text-end">BCP</span>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                                                            <span class="text-muted">Cuenta (Dólares)</span>
+                                                            <span class="fw-bold text-primary fs-6">194-7417292-1-50</span>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                                                            <span class="text-muted">CCI</span>
+                                                            <span class="text-muted fst-italic">-</span>
+                                                        </li>
+                                                    </ul>
+
+                                                    <!-- Sección Internacional (Solo complementos) -->
+                                                    <div class="bg-soft rounded-3 p-3 border border-light-subtle">
+                                                        <div class="d-flex align-items-center mb-2">
+                                                            <span class="badge bg-secondary me-2" style="font-size: 0.7rem;">Internacional</span>
+                                                            <span class="fw-bold text-dark text-sm">Datos adicionales</span>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between mb-1 text-sm">
+                                                            <span class="text-muted">SWIFT</span>
+                                                            <span class="fw-bold">BCPLPEPL</span>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between text-sm">
+                                                            <span class="text-muted me-3">Dirección</span>
+                                                            <span class="text-end fw-semibold">Calle Centenario 156<br>La Molina, Lima</span>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+
                                         <div class="row">
                                             <div class="col-md-2"></div>
                                             <div class="col-md-8">
