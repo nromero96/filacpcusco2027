@@ -133,8 +133,8 @@ class GafeteController extends Controller
         EOD;
 
         $pdf = new TCPDF();
-        $pdf->SetCreator('CONGRESO BOLIVARIANO DE CIRUGÍA PLÁSTICA FILACP 2027');
-        $pdf->SetAuthor('CONGRESO BOLIVARIANO DE CIRUGÍA PLÁSTICA FILACP 2027');
+        $pdf->SetCreator('XIV CONGRESO BOLIVARIANO DE CIRUGÍA PLÁSTICA FILACP 2027');
+        $pdf->SetAuthor('XIV CONGRESO BOLIVARIANO DE CIRUGÍA PLÁSTICA FILACP 2027');
         $pdf->SetTitle('GAFETE: '.$inscriptions->id.'-'. $inscriptions->solapin_name);
         $pdf->SetSubject('GAFETE: '.$inscriptions->id.'-'. $inscriptions->solapin_name);
         $pdf->SetKeywords('GAFETE, CONGRESO BOLIVARIANO DE CIRUGÍA PLÁSTICA FILACP 2027');
@@ -351,11 +351,11 @@ class GafeteController extends Controller
                 ->get();
 
         $pdf = new TCPDF();
-        $pdf->SetCreator('CONGRESO BOLIVARIANO DE CIRUGÍA PLÁSTICA FILACP 2027');
-        $pdf->SetAuthor('CONGRESO BOLIVARIANO DE CIRUGÍA PLÁSTICA FILACP 2027');
+        $pdf->SetCreator('XIV CONGRESO BOLIVARIANO DE CIRUGÍA PLÁSTICA FILACP 2027');
+        $pdf->SetAuthor('XIV CONGRESO BOLIVARIANO DE CIRUGÍA PLÁSTICA FILACP 2027');
         $pdf->SetTitle('Lista de Gafetes');
         $pdf->SetSubject('Lista de Gafetes');
-        $pdf->SetKeywords('Lista de Gafetes, CONGRESO BOLIVARIANO DE CIRUGÍA PLÁSTICA FILACP 2027');
+        $pdf->SetKeywords('Lista de Gafetes, XIV CONGRESO BOLIVARIANO DE CIRUGÍA PLÁSTICA FILACP 2027');
         
         $pdf->AddPage();
 

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no">
-    <title>Registro | CONGRESO BOLIVARIANO 2027</title>
+    <title>Registro | XIV CONGRESO BOLIVARIANO 2027</title>
     <link rel="icon" type="image/x-icon" href="{{asset('assets/img/favicon.ico')}}"/>
     <link href="{{asset('layouts/vertical-light-menu/css/light/loader.css')}}" rel="stylesheet" type="text/css" />
     <link href="{{asset('layouts/vertical-light-menu/css/dark/loader.css')}}" rel="stylesheet" type="text/css" />
@@ -42,7 +42,7 @@
                         <div class="auth-overlay" style="background-image: url({{asset('assets/img/bg-lg-1-min.jpg')}});background-size: cover;"></div>
                         <div class="auth-cover">
                             <div class="position-relative">
-                                <h2 class="mt-5 text-white px-2" style="font-weight: bold;">CONGRESO BOLIVARIANO DE CIRUGÍA PLÁSTICA FILACP</h2>
+                                <h2 class="mt-5 text-white px-2" style="font-weight: bold;">XIV CONGRESO BOLIVARIANO DE CIRUGÍA PLÁSTICA FILACP</h2>
                                 <p class="text-white">Valle Sagrado, Cusco, Perú — del 4 al 7 de mayo de 2027</p>
                             </div>
                         </div>

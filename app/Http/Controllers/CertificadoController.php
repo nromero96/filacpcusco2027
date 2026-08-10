@@ -33,7 +33,7 @@ class CertificadoController extends Controller
 
             // set document information
             $pdf->SetCreator(PDF_CREATOR);
-            $pdf->SetAuthor('CONGRESO BOLIVARIANO FILACP 2027');
+            $pdf->SetAuthor('XIV CONGRESO BOLIVARIANO FILACP 2027');
             $pdf->SetTitle('CERTIFICADO DE ASISTENCIA: '.$inscription->name.' '.$inscription->lastname.' '.$inscription->second_lastname);
             $pdf->SetSubject('CERTIFICADO DE ASISTENCIA');
 
@@ -107,7 +107,7 @@ class CertificadoController extends Controller
 
         // set document information
         $pdf->SetCreator(PDF_CREATOR);
-        $pdf->SetAuthor('CONGRESO BOLIVARIANO FILACP 2027');
+        $pdf->SetAuthor('XIV CONGRESO BOLIVARIANO FILACP 2027');
         $pdf->SetTitle('Certificado de Asistencia');
         $pdf->SetSubject('Información');
 

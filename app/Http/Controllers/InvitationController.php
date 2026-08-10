@@ -91,7 +91,7 @@ class InvitationController extends Controller
         $fechaactual = 'Lima, ' . $fechaactual;
 
         $content = <<<EOD
-            <p style="font-size:15px;text-align:center; color:#c40000;"><img src="{$logo}" alt="logo" width="280" height="47" /><br><b style="color:red;font-size:18px;text-align:center;">CONGRESO BOLIVARIANO FILACP 2027</b><br><b style="color:blue;font-size:14px;text-align:center;">CONGRESO BOLIVARIANO DE CIRUGÍA PLÁSTICA FILACP</b><br><b style="color:#000;font-size:11px;text-align:center;">Edición Presencial</b><br><b style="color:#000;font-size:12px;text-align:center;">Valle Sagrado, Cusco, Perú — del 4 al 7 de mayo de 2027</b><br></p>
+            <p style="font-size:15px;text-align:center; color:#c40000;"><img src="{$logo}" alt="logo" width="280" height="47" /><br><b style="color:red;font-size:18px;text-align:center;">XIV CONGRESO BOLIVARIANO FILACP 2027</b><br><b style="color:blue;font-size:14px;text-align:center;">XIV CONGRESO BOLIVARIANO DE CIRUGÍA PLÁSTICA FILACP</b><br><b style="color:#000;font-size:11px;text-align:center;">Edición Presencial</b><br><b style="color:#000;font-size:12px;text-align:center;">Valle Sagrado, Cusco, Perú — del 4 al 7 de mayo de 2027</b><br></p>
             <p>{$fechaactual}</p>
             <br>
             <p>Señor(a) Doctor(a)</p>
@@ -99,7 +99,7 @@ class InvitationController extends Controller
             <p><strong>E-mail:</strong> {$invitation->email}</p>
             <p><strong>País:</strong> {$invitation->country}</p>
             <p>Estimado(a) colega:</p>
-            <p style="text-align: justify;">Es grato dirigirnos a usted para invitarle muy cordialmente a participar en el <b>CONGRESO BOLIVARIANO DE CIRUGÍA PLÁSTICA FILACP</b> que se realizará en la ciudad Valle Sagrado, Cusco, Perú — del 4 al 7 de mayo de 2027 en las instalaciones del Centro de Convenciones Vidawasi.</p>
+            <p style="text-align: justify;">Es grato dirigirnos a usted para invitarle muy cordialmente a participar en el <b>XIV CONGRESO BOLIVARIANO DE CIRUGÍA PLÁSTICA FILACP</b> que se realizará en la ciudad Valle Sagrado, Cusco, Perú — del 4 al 7 de mayo de 2027 en las instalaciones del Centro de Convenciones Vidawasi.</p>
             <p style="text-align: justify;">Esperamos que esta invitación encuentre en Ud. favorable acogida que le permita disfrutar de una jornada con alta calidad científica con la presencia de destacados profesores internacionales.</p>
             <p>Hacemos propicia esta oportunidad para reiterarle nuestros más cordiales saludos.</p>
             <br>
@@ -115,7 +115,7 @@ class InvitationController extends Controller
             <p></p>
             <p></p>
             <p></p>
-            <p style="font-size:9px;text-align:center;"><i><u>Nota:</u> Esta invitación es exclusiva para inscribirse en CONGRESO BOLIVARIANO FILACP 2027 y no incluye gastos de viaje a Perú: pasaje aéreo, hospedaje o traslados en Lima.</i></p>
+            <p style="font-size:9px;text-align:center;"><i><u>Nota:</u> Esta invitación es exclusiva para inscribirse en XIV CONGRESO BOLIVARIANO FILACP 2027 y no incluye gastos de viaje a Perú: pasaje aéreo, hospedaje o traslados en Lima.</i></p>
             <p></p>
             <p></p>
             <p></p>

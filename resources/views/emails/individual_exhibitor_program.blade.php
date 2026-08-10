@@ -26,7 +26,7 @@
         </p>
 
         <p style="font-size: 14px;">
-            Este es un gentil recordatorio de la agenda de sus presentaciones en CONGRESO BOLIVARIANO FILACP 2027.
+            Este es un gentil recordatorio de la agenda de sus presentaciones en XIV CONGRESO BOLIVARIANO FILACP 2027.
         </p>
 
         <table style="width:100%;text-align: left; font-size: 14px;">
@@ -53,11 +53,11 @@
         </p>
 
         <p style="font-size: 14px;">
-            Igualmente, puede ver en su perfil de usuario de CONGRESO BOLIVARIANO FILACP 2027 su agenda personalizada con todas las sesiones científicas en las que participa.
+            Igualmente, puede ver en su perfil de usuario de XIV CONGRESO BOLIVARIANO FILACP 2027 su agenda personalizada con todas las sesiones científicas en las que participa.
         </p>
 
         <p style="font-size: 14px;">
-            Sea propicia la ocasión para reiterarle nuestro agradecimiento por su contribución al desarrollo de CONGRESO BOLIVARIANO FILACP 2027.
+            Sea propicia la ocasión para reiterarle nuestro agradecimiento por su contribución al desarrollo de XIV CONGRESO BOLIVARIANO FILACP 2027.
         </p>
 
         <p style="font-size: 14px;">

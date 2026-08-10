@@ -10,7 +10,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>CONGRESO BOLIVARIANO FILACP 2027</title>
+    <title>XIV CONGRESO BOLIVARIANO FILACP 2027</title>
     <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon.ico') }}"/>
     
     <!-- BEGIN GLOBAL MANDATORY STYLES -->
@@ -230,7 +230,7 @@
 
     <div class="text-center pt-5">
         <a href="https://bolivarianofilacpcusco2027.org">
-            <img src="{{ asset('assets/img/logo2.png') }}" class="lghead" alt="CONGRESO BOLIVARIANO FILACP 2027">
+            <img src="{{ asset('assets/img/logo2.png') }}" class="lghead" alt="XIV CONGRESO BOLIVARIANO FILACP 2027">
         </a>
         <h1 class="tit-precongress">ACTIVIDADES PRE CONGRESO</h1>
         <p class="subtit-precongress">Swissôtel, 7 de mayo de 2024</p>

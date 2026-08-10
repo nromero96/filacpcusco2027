@@ -115,7 +115,7 @@
         <p>Para mayores detalles, puede contactarse con nosotros a través del e-mail <b>inscripciones@rosmarasociados.com</b></p><br>
 
         <!-- Firma y contacto del Comité Organizador -->
-        <p class="signature">Atentamente,<br>Comité Organizador - Inscripciones<br><b>CONGRESO BOLIVARIANO FILACP 2027</b><br>+51 983 481 269<br>inscripciones@rosmarasociados.com</p>
+        <p class="signature">Atentamente,<br>Comité Organizador - Inscripciones<br><b>XIV CONGRESO BOLIVARIANO FILACP 2027</b><br>+51 983 481 269<br>inscripciones@rosmarasociados.com</p>
     </div>
 </body>
 </html>
