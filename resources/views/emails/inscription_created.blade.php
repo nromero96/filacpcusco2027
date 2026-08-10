@@ -92,6 +92,12 @@
                 <td>Precio</td>
                 <td>US$ {{ $datainscription->price_category }}</td>
             </tr>
+            @if($datainscription->accompanist_id != null)
+            <tr>
+                <td>Acompañante</td>
+                <td>{{ $datainscription->price_accompanist }}</td>
+            </tr>
+            @endif
             <tr>
                 <td><b>Monto Total</b></td>
                 <td>US$ {{ $datainscription->total }}</td>

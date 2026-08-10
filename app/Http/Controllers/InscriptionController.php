@@ -643,6 +643,18 @@ class InscriptionController extends Controller
 
     public function storeMyInscription(Request $request){
 
+        $amount_especialcode = 0;
+        //si $request->category_inscription_id == 7 validar que exista el código especial
+        if($request->category_inscription_id == 7){
+            //get amount code special
+            $specialcode = SpecialCode::where('code', $request->specialcode)->first();
+            if($specialcode){
+                $amount_especialcode = $specialcode->amount;
+            }else{
+                return redirect()->route('inscriptions.create')->with('error', 'El código especial no existe');
+            }
+        }
+
         //get logged user id
         $iduser = \Auth::user()->id;
 
@@ -715,17 +727,56 @@ class InscriptionController extends Controller
             $user->solapin_lastname = $request->solapin_lastname;
             $user->confir_information = 'si';
             $user->save();
-            
+
+            //verificar si existe acompañante en la inscripcion, registrar y devolver id
+            if($request->accompanist != ''){
+                $accompanist = new Accompanist();
+                $accompanist->accompanist_name = $request->accompanist_name;
+                $accompanist->accompanist_typedocument = $request->accompanist_typedocument;
+                $accompanist->accompanist_numdocument = $request->accompanist_numdocument;
+                $accompanist->accompanist_solapin = $request->accompanist_solapin;
+                $accompanist->save();
+                $data_accompanist_id = $accompanist->id;
+            }else{
+                $data_accompanist_id = null;
+            }
+
             // Insertar inscripción
             $inscription = new Inscription();
             $inscription->user_id = $iduser;
             $inscription->category_inscription_id = $request->category_inscription_id;
-
             $category_inscription = CategoryInscription::find($request->category_inscription_id);
-
             $inscription->price_category = $category_inscription->price;
-            $inscription->price_accompanist = 0;
-            $inscription->total = $inscription->price_category + $inscription->price_accompanist;
+            $inscription->accompanist_id = $data_accompanist_id;
+
+             //si $amount_especialcode es mayor a 0, poner el precio del código especial
+            if($amount_especialcode > 0){
+                $inscription->price_category = $amount_especialcode;
+            }else{
+                $inscription->price_category = $category_inscription->price;
+            }
+
+            if($request->accompanist != ''){
+                $inscription->accompanist_id = $data_accompanist_id;
+                $category_inscription_accompanist = CategoryInscription::where('name', 'Acompañante')->first();
+                
+                if($request->category_inscription_id == 9 || $request->category_inscription_id == 11){
+                    $inscription->price_accompanist = 0;
+                }else{
+                    $inscription->price_accompanist = $category_inscription_accompanist->price;
+                }
+            }else{
+                $inscription->accompanist_id = $data_accompanist_id;
+                $inscription->price_accompanist = 0;
+            }
+
+
+            if($request->category_inscription_id == 9 || $request->category_inscription_id == 11){
+                $inscription->total = 0;
+            }else{
+                $inscription->total = $inscription->price_category + $inscription->price_accompanist;
+            }
+            
             $inscription->special_code = $request->specialcode;
             $inscription->invoice = $request->invoice;
             $inscription->invoice_ruc = $request->invoice_ruc;

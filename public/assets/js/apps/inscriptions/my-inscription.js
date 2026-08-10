@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return false;
         }
 
-        const categoriasPermitidas = ['1','2','3','4'];
+        const categoriasPermitidas = ['3','5'];
 
         if (categoriasPermitidas.includes(selectedRadioCategoryInscription.value)) {
             if (!validarArchivoFilePond('document_file', "Debe adjuntar documento probatorio de categoría (Título, Constancia, Carnet profesional).")) {
@@ -52,13 +52,13 @@ document.addEventListener("DOMContentLoaded", function () {
         if(selectedRadioPaymentMethod.value === 'Transferencia/Depósito') {
           const exemptCategories = ['1', '2', '3'];
           if (exemptCategories.includes(selectCategoryRadioButtons.value)) {
-              // if (!validarArchivoFilePond('voucher_file', "Debe adjuntar un comprobante de transferencia o depósito")) {
-              //     return false;
-              // }
+              if (!validarArchivoFilePond('voucher_file', "Debe adjuntar un comprobante de transferencia o depósito")) {
+                  return false;
+              }
           }
         }
 
-        if(selectedRadioCategoryInscription.value === '4' && document.getElementById('specialcode_verify').value === ''){
+        if(selectedRadioCategoryInscription.value === '5' && document.getElementById('specialcode_verify').value === ''){
             alert('Debe validar la cuota especial');
             return false;
         }
@@ -202,7 +202,7 @@ function handleCategoryRadioButtons(){
     }
 
 
-    if(selectedValueCategory === '1' || selectedValueCategory === '2' || selectedValueCategory === '3'){
+    if(selectedValueCategory === '3'){
 
       //Document file required
       dvDocumentFile.classList.remove('d-none');
@@ -219,7 +219,7 @@ function handleCategoryRadioButtons(){
       btnValidateSpecialCode.classList.remove('d-none');
       btnClearSpecialCode.classList.add('d-none');
 
-    }else if(selectedValueCategory === '4'){
+    }else if(selectedValueCategory === '5'){
 
         cprequired.classList.add('d-none');
 
