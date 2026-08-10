@@ -29,6 +29,6 @@ class RecordatorioInscripcionMail extends Mailable
     public function build()
     {
         return $this->view('emails.recordatorio')
-        ->subject('Complete su inscripción aL CONGRESO BOLIVARIANO FILACP 2027');
+        ->subject('Complete su inscripción al XIV CONGRESO BOLIVARIANO FILACP 2027');
     }
 }

@@ -38,7 +38,7 @@
   </head>
   <body>
     <div style="display:none; overflow:hidden; line-height:1; max-height:0; max-width:0; opacity:0; mso-hide:all;">
-      Complete su inscripción a la JCONGRESO BOLIVARIANO FILACP 2027
+      Complete su inscripción al XIV CONGRESO BOLIVARIANO FILACP 2027
     </div>
     <table role="presentation" class="wrapper" width="100%" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
       <tr>
@@ -55,7 +55,7 @@
                             <img src="https://my.bolivarianofilacp.org/assets/img/logo-mail.png" width="48" height="48" alt="CONGRESO BOLIVARIANO FILACP 2027" style="display:block; border:0; max-width:120px; height:auto;" />
                           </td>
                           <td align="right" style="text-align:right;">
-                            <div class="brand">CONGRESO BOLIVARIANO FILACP 2027</div>
+                            <div class="brand">XIV CONGRESO BOLIVARIANO FILACP 2027</div>
                             <div class="subtitle">Sistema de Inscripciones</div>
                           </td>
                         </tr>
