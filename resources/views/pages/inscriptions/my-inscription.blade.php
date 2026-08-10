@@ -154,8 +154,16 @@
 
                             <div class="col-md-6">
                                 <label for="inputSolapin" class="form-label fw-bold mb-0">{{__("Solapín/Gafete")}} <span class="text-danger">*</span> <small class="fw-normal">({{ __("Un nombre y un apellido") }})</small></label>
-                                <input type="text" class="form-control convert_mayus" name="solapin_name" id="inputSolapin" value="{{ old('solapin_name') }}" required>
-                                {!!$errors->first("solapin_name", "<span class='text-danger'>:message</span>")!!}
+                                <div class="d-flex gap-2">
+                                    <div class="w-50">
+                                        <input type="text" class="form-control convert_mayus" name="solapin_name" id="inputSolapin" value="{{ old('solapin_name') }}" placeholder="Name" required>
+                                        {!!$errors->first("solapin_name", "<span class='text-danger'>:message</span>")!!}
+                                    </div>
+                                    <div class="w-50">
+                                        <input type="text" class="form-control convert_mayus" name="solapin_lastname" id="inputSolapin" value="{{ old('solapin_lastname') }}" placeholder="Lastname" required>
+                                        {!!$errors->first("solapin_lastname", "<span class='text-danger'>:message</span>")!!}
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="col-md-12">
@@ -179,14 +187,14 @@
 
                                             @foreach ($category_inscriptions as $category)
                                                 @php
-                                                    if($category->name == 'Residentes en dermatología'){
+                                                    if($category->name == 'Residentes'){
                                                         $infomark = ' <span class="text-danger">*</span>';
                                                     }else{
                                                         $infomark = '';
                                                     }
                                                 @endphp
 
-                                                @if ($category->type == 'radio' && $category->status == 'active' && $category->id != '5')
+                                                @if ($category->type == 'radio' && $category->status == 'active')
                                                     <tr>
                                                         <td>
                                                             <div class="form-check form-check-primary me-1">
@@ -196,7 +204,7 @@
                                                                 </label>
                                                             </div>
 
-                                                            @if ($category->id == '4')
+                                                            @if ($category->id == '5')
                                                             <div id="dv_specialcode" class="d-none">
                                                                 <div class="d-sm-inline-block">
                                                                     <div class="input-group mt-1 mb-0">
@@ -220,16 +228,16 @@
 
                                                 @endif
 
-                                                @if($beneficiariobeca == 'si' && $category->status == 'active' && $category->id == '4')
+                                                @if ($category->type == 'checkbox' && $category->name == 'Acompañante' && $category->status == 'active')
                                                     <tr>
                                                         <td>
                                                             <div class="form-check form-check-primary">
-                                                                <input type="{{ $category->type }}" id="category_{{ $category->id }}" name="category_inscription_id" value="{{ $category->id }}" class="form-check-input cursor-pointer" data-catprice="{{ $category->price }}">
-                                                                <label class="form-check-label mb-0 ms-1 cursor-pointer" for="category_{{ $category->id }}">{{ $category->name }}{!! $infomark !!}</label>
+                                                                <input class="form-check-input cursor-pointer" type="checkbox" name="accompanist" value="si" id="customcheck_{{ $category->id }}" data-catprice="{{ $category->price }}">
+                                                                <label class="form-check-label mb-0 ms-1 cursor-pointer" for="customcheck_{{ $category->id }}">{{ $category->name }}</label>
                                                             </div>
                                                         </td>
                                                         <td>
-                                                            <b>US$ <span id="dc_price_{{ $category->id }}">{{ $category->price === '0.00' ? '00' : rtrim(rtrim($category->price, '0'), '.') }}</span></b>
+                                                            <b>US$ {{ $category->price === '0.00' ? '00' : rtrim(rtrim($category->price, '0'), '.') }}</b>
                                                         </td>
                                                     </tr>
                                                 @endif

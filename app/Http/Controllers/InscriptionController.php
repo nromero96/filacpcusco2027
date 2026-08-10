@@ -673,6 +673,7 @@ class InscriptionController extends Controller
             'whatsapp_number' => 'required|string',
             'workplace' => 'required|string',
             'solapin_name' => 'required|string',
+            'solapin_lastname' => 'required|string',
             //data inscription
             'category_inscription_id' => 'required|numeric',
             'specialcode' => 'nullable|string',
@@ -711,6 +712,7 @@ class InscriptionController extends Controller
             $user->whatsapp_number = $request->whatsapp_number;
             $user->workplace = $request->workplace;
             $user->solapin_name = $request->solapin_name;
+            $user->solapin_lastname = $request->solapin_lastname;
             $user->confir_information = 'si';
             $user->save();
             

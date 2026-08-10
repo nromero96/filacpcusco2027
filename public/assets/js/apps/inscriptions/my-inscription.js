@@ -105,6 +105,17 @@ function calculateTotalPrice() {
 
     if (checkbox.checked) {
       const catPrice = parseFloat(checkbox.getAttribute('data-catprice'));
+      
+      //IF category 9 not add price
+
+      const selectedRadioCategory = document.querySelector('input[type="radio"][name="category_inscription_id"]:checked');
+      const selectedValueCategory = document.querySelector('input[type="radio"][name="category_inscription_id"]:checked').value;
+
+      if(selectedValueCategory === '9' || selectedValueCategory === '11'){
+        totalPrice += 0;
+      }else{
+        totalPrice += catPrice;
+      }
 
       //remove class d-none in dv_accompanist
       dvAccompanist.classList.remove('d-none');
@@ -161,7 +172,6 @@ const btnClearSpecialCode = document.getElementById('clear_specialcode');
 const specialCodeVerify = document.getElementById('specialcode_verify');
 const descriptionSpecialCode = document.getElementById('sms_valid_vc');
 const dv_payment = document.getElementById('dv_payment');
-const dv_sms_extranjero = document.getElementById('sms_extranjero');
 
 const inputVoucherFile = document.getElementById('voucher_file');
 
@@ -179,11 +189,9 @@ function handleCategoryRadioButtons(){
 
 
     if(selectedValueCategory === '1' || selectedValueCategory === '2' || selectedValueCategory === '3' || selectedValueCategory === '4' || selectedValueCategory === '5'){
-      dv_payment.classList.add('d-none');
-      dv_sms_extranjero.classList.remove('d-none');
-    }else{
       dv_payment.classList.remove('d-none');
-      dv_sms_extranjero.classList.add('d-none');
+    }else{
+      dv_payment.classList.add('d-none');
     }
 
     // Handle CP Required

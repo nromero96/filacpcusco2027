@@ -41,6 +41,7 @@ class User extends Authenticatable
         'status',
         'photo',
         'solapin_name',
+        'solapin_lastname',
         'confir_information',
     ];
 
