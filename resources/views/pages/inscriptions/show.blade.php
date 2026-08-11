@@ -139,7 +139,7 @@
                             <div class="col-md-4">
                                 <label class="form-label fw-bold mb-0">{{__("Solapín/Gafete")}}:</label><br>
                                 <span class="bx-text">
-                                    {{ $inscription->user_solapin_name }}
+                                    {{ $inscription->user_solapin_name }}  {{ $inscription->user_solapin_lastname }}
                                     <a href="{{ route('gafetes.gafeteforparticipant', $inscription->id) }}" class="float-end px-1 py-0" target="_blank">
                                         <svg width="17" height="17" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -194,6 +194,18 @@
                                                         <b>US$ {{ $inscription->price_category }}</b>
                                                     </td>
                                                 </tr>
+
+                                                @if($inscription->accompanist_id != null)
+                                                <tr>
+                                                    <td>
+                                                        {{ __('Compañante') }}
+                                                    </td>
+                                                    <td>
+                                                        <b>US$ {{ $inscription->price_accompanist }}</b>
+                                                    </td>
+                                                </tr>
+                                                @endif
+
                                             <tr class="table-secondary">
                                                 <td><b>Monto Total</b></td>
                                                 <td><b>US$ {{ $inscription->total }}</b></td>
@@ -282,7 +294,7 @@
                             @endif
 
                             @if(!in_array($inscription->category_inscription_name, ['Invitado']))
-                            <div class="col-md-12 d-none">
+                            <div class="col-md-12">
                                 <div class="card px-3 py-3">
                                     <label for="" class="form-label fw-bold mb-0">{{ __('Método de Pago') }}:</label>
                                     <div class="">

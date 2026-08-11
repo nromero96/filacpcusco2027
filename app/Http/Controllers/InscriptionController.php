@@ -428,6 +428,7 @@ class InscriptionController extends Controller
                     'users.email as user_email',
                     'users.workplace as user_workplace',
                     'users.solapin_name as user_solapin_name',
+                    'users.solapin_lastname as user_solapin_lastname',
                     'accompanists.accompanist_name as accompanist_name',
                     'accompanists.accompanist_typedocument as accompanist_typedocument',
                     'accompanists.accompanist_numdocument as accompanist_numdocument',
