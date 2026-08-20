@@ -218,8 +218,8 @@ class InscriptionController extends Controller
     {
 
         $amount_especialcode = 0;
-        //si $request->category_inscription_id == 7 validar que exista el código especial
-        if($request->category_inscription_id == 7){
+        //si $request->category_inscription_id == 5 validar que exista el código especial
+        if($request->category_inscription_id == 5){
             //get amount code special
             $specialcode = SpecialCode::where('code', $request->specialcode)->first();
             if($specialcode){
@@ -352,7 +352,7 @@ class InscriptionController extends Controller
 
             //verica si es beneficiario beca y el monto es 0
             $beneficiariobeca = BeneficiarioBeca::where('email', \Auth::user()->email)->first();
-            if($beneficiariobeca && $request->category_inscription_id == '4' && $inscription->total == 0){
+            if($beneficiariobeca && $request->category_inscription_id == '7' && $inscription->total == 0){
                 $inscription->status = 'Pagado';
             }else{
                 $inscription->status = 'Pendiente';
@@ -919,6 +919,7 @@ class InscriptionController extends Controller
             $user->country = $request->country ?? '';
             $user->password = bcrypt($request->inputPassword) ?? '';
             $user->solapin_name = $request->inputSolapin ?? '';
+            $user->solapin_lastname = $request->inputSolapinLastName ?? '';
             $user->photo = 'default-profile.jpg';
             $user->status = 'active';
             $user->save();

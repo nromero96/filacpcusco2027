@@ -95,7 +95,7 @@
             @if($datainscription->accompanist_id != null)
             <tr>
                 <td>Acompañante</td>
-                <td>{{ $datainscription->price_accompanist }}</td>
+                <td>US$ {{ $datainscription->price_accompanist }}</td>
             </tr>
             @endif
             <tr>
