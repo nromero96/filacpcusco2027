@@ -32,6 +32,10 @@ html {
   font-size: 12px;
 }
 
+.filepond--drop-label {
+  border: 1px dashed #882c31;
+}
+
 .btn-vert-detalle {
   position: absolute;
   bottom: 0px;

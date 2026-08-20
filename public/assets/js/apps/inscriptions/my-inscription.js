@@ -365,6 +365,7 @@ btnClearSpecialCode.addEventListener('click', function(){
 
 const inputPaymentMethod = document.querySelectorAll('input[type="radio"][name="payment_method"]');
 const dvTranfer = document.getElementById('dv_tranfer');
+const dvCard = document.getElementById('dv_card');
 
 inputPaymentMethod.forEach(radio => {
     radio.addEventListener('change', handlePaymentMethod);
@@ -374,9 +375,14 @@ function handlePaymentMethod(){
     const selectedValuePaymentMethod = document.querySelector('input[type="radio"][name="payment_method"]:checked').value;
     if(selectedValuePaymentMethod === 'Transferencia/Depósito'){
         dvTranfer.classList.remove('d-none');
-        
+        dvCard.classList.add('d-none');
+        //enable btnSubInscription
+        btnSubInscription.disabled = false;
     }else{
         dvTranfer.classList.add('d-none');
+        dvCard.classList.remove('d-none');
+        //disable btnSubInscription
+        btnSubInscription.disabled = true;
     }
 }
 

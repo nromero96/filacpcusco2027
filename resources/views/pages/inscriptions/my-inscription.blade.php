@@ -348,9 +348,7 @@
 
                                     <div id="dv_tranfer" class="mt-3">
 
-                                        
-
-                                        <div class="p-3 d-flex justify-content-center"> 
+                                        <div class="p-1 d-flex justify-content-center"> 
 
                                             <!-- Contenedor principal más estrecho y con bordes más redondeados -->
                                             <div class="card shadow-sm rounded-4 border-0 w-100" style="max-width: 400px;">
@@ -372,7 +370,7 @@
                                                         </li>
                                                         <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
                                                             <span class="text-muted">CCI</span>
-                                                            <span class="text-muted fst-italic">-</span>
+                                                            <span class="text-muted fst-italic">002 194 007417292150 99</span>
                                                         </li>
                                                     </ul>
 
@@ -410,10 +408,10 @@
                                         </div>
                                     </div>
 
-                                    <div id="dv_card" class="pt-4 pb-4 d-none">
+                                    <div id="dv_card" class="pt-4 pb-4">
                                         <p class="text-center">
                                             <div class="alert alert-info alert-dismissible fade show text-center" role="alert">
-                                                Realiza tu pago con cualquier tarjeta de crédito o débito.<br> Proximamente enviaremos link de pago seguro por e-mail para completar su inscripción.
+                                                Próximamente, podrás pagar tu inscripción con tarjeta de crédito/débito.
                                             </div>
                                         </p>
                                     </div>
