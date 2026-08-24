@@ -112,10 +112,10 @@
         <p><a href="https://my.congresobolivarianofilacp.com/">Ver Inscripción</a></p>
 
         <!-- Contacto de soporte -->
-        <p>Para mayores detalles, puede contactarse con nosotros a través del e-mail <b>inscripciones@rosmarasociados.com</b></p><br>
+        <p>Para mayores detalles, puede contactarse con nosotros a través del e-mail <b>inscripciones@bolivarianofilacpcusco2027.org</b></p><br>
 
         <!-- Firma y contacto del Comité Organizador -->
-        <p class="signature">Atentamente,<br>Comité Organizador - Inscripciones<br><b>CONGRESO BOLIVARIANO FILACP 2027</b><br>+51 983 481 269<br>inscripciones@rosmarasociados.com</p>
+        <p class="signature">Atentamente,<br>Comité Organizador - Inscripciones<br><b>CONGRESO BOLIVARIANO FILACP 2027</b><br>+51 983 481 269<br>inscripciones@bolivarianofilacpcusco2027.org</p>
     </div>
 </body>
 </html>
