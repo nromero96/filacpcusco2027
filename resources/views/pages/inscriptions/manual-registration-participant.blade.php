@@ -245,7 +245,7 @@
 
                             </div>
 
-                            <div class="col-md-12 d-none">
+                            <div class="col-md-12">
                                 <div class="card px-3 py-3">
                                     <label for="" class="form-label fw-bold">
                                         {{ __('¿Necesita Factura?') }}

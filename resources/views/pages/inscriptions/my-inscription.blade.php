@@ -289,7 +289,7 @@
 
                             </div>
 
-                            <div class="col-md-12 d-none" id="dv_invoice">
+                            <div class="col-md-12" id="dv_invoice">
                                 <div class="card px-3 py-3">
                                     <label for="" class="form-label fw-bold">
                                         {{ __('¿Necesita Factura?') }}
