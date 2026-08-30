@@ -8,7 +8,10 @@
     .inscription-intro { background: linear-gradient(135deg, #eef2ff 0%, #f8faff 100%); border: 1px solid #dce4ff; border-radius: 14px; }
     .inscription-step { display: flex; align-items: center; gap: .65rem; color: #344054; font-weight: 700; }
     .inscription-step-number { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--inscription-primary); color: #fff; font-size: .85rem; }
-    .inscription-shell .form-control, .inscription-shell .form-select { min-height: 42px; transition: border-color .2s, box-shadow .2s, background-color .2s; }
+    .inscription-shell form .row, .inscription-shell form.row { --bs-gutter-x: .85rem; --bs-gutter-y: .7rem; }
+    .inscription-shell .widget-content-area { padding: 1rem 1.25rem 1.25rem; }
+    .inscription-shell .form-label { font-size: .86rem; }
+    .inscription-shell .form-control, .inscription-shell .form-select { min-height: 40px; padding-top: .45rem; padding-bottom: .45rem; transition: border-color .2s, box-shadow .2s, background-color .2s; }
     .inscription-shell .form-control:focus, .inscription-shell .form-select:focus { border-color: #7186ee; box-shadow: 0 0 0 .2rem rgba(67, 97, 238, .12); }
     .category-row { cursor: pointer; transition: background-color .2s, box-shadow .2s; }
     .category-row:hover { background: #f8faff; }
@@ -16,10 +19,36 @@
     .category-row.is-selected label { color: #263b98; font-weight: 700; }
     .course-card { cursor: pointer; border: 1px solid #e5e9f2; transition: .2s; }
     .course-card.is-selected { border-color: var(--inscription-primary); background: var(--inscription-soft); }
-    .form-panel { border: 1px solid #e5e9f2; border-radius: 12px; padding: 1rem; background: #fff; }
+    .course-card .course-option { flex: 0 0 auto; width: 1.1rem; height: 1.1rem; }
+    .course-card .flex-grow-1 { min-width: 0; }
+    .course-card .d-flex.justify-content-between { align-items: flex-start; gap: .6rem; }
+    .course-card strong { min-width: 0; overflow-wrap: anywhere; line-height: 1.3; }
+    .payment-choice { position: relative; display: flex; align-items: center; min-height: 54px; height: 100%; padding: .55rem 2.2rem .55rem .7rem; border: 2px solid #e5e9f2; border-radius: 10px; cursor: pointer; text-align: left; transition: .2s; }
+    .payment-choice.is-selected { border-color: var(--inscription-primary); background: var(--inscription-soft); }
+    .payment-choice input { position: absolute; top: .65rem; right: .7rem; }
+    .payment-choice strong { font-size: .9rem; line-height: 1.2; }
+    .form-panel { border: 1px solid #e5e9f2; border-radius: 12px; padding: .85rem; background: #fff; }
+    .inscription-shell .card { margin-bottom: 0; }
+    .inscription-shell .table > :not(caption) > * > * { padding: .65rem .75rem; vertical-align: middle; }
     .form-error-summary { border-left: 4px solid #e7515a; }
     @media (max-width: 767.98px) {
-        .inscription-shell .widget-content-area { padding-left: 12px; padding-right: 12px; }
+        .inscription-shell { font-size: .93rem; }
+        .inscription-shell .layout-top-spacing { margin-top: .75rem !important; }
+        .inscription-shell .widget-header { padding-left: .7rem !important; padding-right: .7rem !important; }
+        .inscription-shell .widget-header h4 { font-size: 1.05rem; }
+        .inscription-shell .widget-content-area { padding: .65rem .7rem 1rem; }
+        .inscription-shell form .row, .inscription-shell form.row { --bs-gutter-x: .6rem; --bs-gutter-y: .6rem; }
+        .form-panel, .tour-card { padding: .75rem !important; }
+        .inscription-step { font-size: .95rem; gap: .5rem; }
+        .inscription-step-number { width: 27px; height: 27px; }
+        .inscription-shell .table > :not(caption) > * > * { padding: .55rem .6rem; }
+        .inscription-shell .table th:last-child, .inscription-shell .table td:last-child { width: 96px !important; }
+        .payment-choice { min-height: 50px; padding: .5rem 2rem .5rem .65rem; }
+        .course-card .d-flex.justify-content-between { display: grid !important; grid-template-columns: minmax(0, 1fr) auto; }
+        .course-card .text-primary { font-size: .92rem; white-space: nowrap; }
+        #text_total { font-size: 1.35rem; }
+        #actionbtn { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+        #actionbtn .btn { margin-top: 0 !important; }
     }
 </style>
 
@@ -399,15 +428,9 @@
                                 <div class="col-md-12">
                                     <div class="card px-3 py-3">
                                         <div class="inscription-step mb-3"><span class="inscription-step-number">3</span> <span>{{ __('FORMA DE PAGO') }}</span></div>
-                                        <div class="text-center">
-                                            <div class="form-check form-check-primary form-check-inline">
-                                                <input class="form-check-input cursor-pointer" type="radio" name="payment_method" value="Transferencia/Depósito" id="payment_method_transfer" @if(old('payment_method', $inscription->payment_method) === 'Transferencia/Depósito') checked @endif required>
-                                                <label class="form-check-label mb-0 cursor-pointer" for="payment_method_transfer">Transferencia bancaria o depósito</label>
-                                            </div>
-                                            <div class="form-check form-check-primary form-check-inline">
-                                                <input class="form-check-input cursor-pointer" type="radio" name="payment_method" value="Tarjeta" id="payment_method_card" @if(old('payment_method', $inscription->payment_method) === 'Tarjeta') checked @endif required>
-                                                <label class="form-check-label mb-0 cursor-pointer" for="payment_method_card">Tarjeta de crédito/débito</label>
-                                            </div>
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-6"><label class="payment-choice" for="payment_method_transfer"><input class="form-check-input" type="radio" name="payment_method" value="Transferencia/Depósito" id="payment_method_transfer" @if(old('payment_method',$inscription->payment_method)==='Transferencia/Depósito') checked @endif required><strong class="pe-4">Transferencia o depósito</strong></label></div>
+                                            <div class="col-md-6"><label class="payment-choice" for="payment_method_card"><input class="form-check-input" type="radio" name="payment_method" value="Tarjeta" id="payment_method_card" @if(old('payment_method',$inscription->payment_method)==='Tarjeta') checked @endif required><strong class="pe-4">Tarjeta</strong></label></div>
                                         </div>
 
                                         @if($inscription->voucher_file != null || $inscription->voucher_file != '')
@@ -676,8 +699,16 @@ document.addEventListener("DOMContentLoaded", function() {
     country.addEventListener('change', updateInvoiceFields);
     document.querySelectorAll('input[name="invoice"]').forEach(radio => radio.addEventListener('change', updateInvoiceFields));
 
+    function updatePaymentChoiceStyle() {
+        document.querySelectorAll('.payment-choice').forEach(choice => {
+            choice.classList.toggle('is-selected', Boolean(choice.querySelector('input:checked')));
+        });
+    }
+    document.querySelectorAll('input[name="payment_method"]').forEach(radio => radio.addEventListener('change', updatePaymentChoiceStyle));
+
     updateCategorySelection();
     updateInvoiceFields();
+    updatePaymentChoiceStyle();
     if (accompanist) accompanist.dispatchEvent(new Event('change'));
     updateTotal();
 

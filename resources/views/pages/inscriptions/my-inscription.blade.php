@@ -8,7 +8,10 @@
     .inscription-intro { background: linear-gradient(135deg, #eef2ff 0%, #f8faff 100%); border: 1px solid #dce4ff; border-radius: 14px; }
     .inscription-step { display: flex; align-items: center; gap: .65rem; color: #344054; font-weight: 700; }
     .inscription-step-number { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--inscription-primary); color: #fff; font-size: .85rem; }
-    .inscription-shell .form-control, .inscription-shell .form-select { min-height: 42px; transition: border-color .2s, box-shadow .2s, background-color .2s; }
+    .inscription-shell form.row { --bs-gutter-x: .85rem; --bs-gutter-y: .7rem; }
+    .inscription-shell .widget-content-area { padding: 1rem 1.25rem 1.25rem; }
+    .inscription-shell .form-label { font-size: .86rem; line-height: 1.25; }
+    .inscription-shell .form-control, .inscription-shell .form-select { min-height: 40px; padding-top: .45rem; padding-bottom: .45rem; transition: border-color .2s, box-shadow .2s, background-color .2s; }
     .inscription-shell .form-control:focus, .inscription-shell .form-select:focus { border-color: #7186ee; box-shadow: 0 0 0 .2rem rgba(67, 97, 238, .12); }
     .category-row { cursor: pointer; transition: background-color .2s, box-shadow .2s; }
     .category-row:hover { background: #f8faff; }
@@ -17,15 +20,64 @@
     .course-card { cursor: pointer; border: 1px solid #e5e9f2; transition: border-color .2s, background-color .2s, box-shadow .2s; }
     .course-card:hover { border-color: #aab7f5; }
     .course-card.is-selected { border-color: var(--inscription-primary); background: var(--inscription-soft); box-shadow: 0 0 0 2px rgba(67, 97, 238, .08); }
+    .course-card .course-option { flex: 0 0 auto; width: 1.1rem; height: 1.1rem; }
+    .course-card .flex-grow-1 { min-width: 0; }
+    .course-card .d-flex.justify-content-between { align-items: flex-start; gap: .6rem; }
+    .course-card strong { min-width: 0; overflow-wrap: anywhere; line-height: 1.3; }
+    .course-card .text-nowrap { flex: 0 0 auto; }
     .tour-card { border: 1px solid #e5e9f2; border-radius: 12px; padding: 1rem; }
     .tour-card.is-selected { border-color: var(--inscription-primary); background: #fafbff; }
-    .form-panel { border: 1px solid #e5e9f2; border-radius: 12px; padding: 1rem; background: #fff; }
+    .payment-choice { position: relative; display: flex; align-items: center; gap: .65rem; min-height: 58px; height: 100%; padding: .55rem 2.2rem .55rem .65rem; border: 2px solid #e5e9f2; border-radius: 10px; cursor: pointer; background: #fff; transition: .2s; text-align: left; }
+    .payment-choice:hover { border-color: #aab7f5; transform: translateY(-1px); }
+    .payment-choice.is-selected { border-color: var(--inscription-primary); background: var(--inscription-soft); box-shadow: 0 0 0 3px rgba(67,97,238,.08); }
+    .payment-choice input { position: absolute; top: .7rem; right: .75rem; }
+    .payment-choice-icon { flex: 0 0 auto; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; background: #eef2ff; color: #4361ee; }
+    .payment-choice-icon svg { width: 19px; height: 19px; }
+    .payment-choice .payment-choice-icon { margin-bottom: 0 !important; }
+    .payment-choice strong { font-size: .92rem; line-height: 1.2; }
+    .payment-choice .badge { flex: 0 0 auto; margin-top: 0 !important; margin-left: auto; padding: .25rem .45rem; }
+    .bank-payment-panel, .voucher-upload-panel { height: 100%; border: 1px solid #e5e9f2; border-radius: 12px; background: #fff; padding: .9rem; }
+    .bank-payment-panel .bank-row { display: flex; justify-content: space-between; gap: 1rem; padding: .48rem 0; border-bottom: 1px solid #eef0f4; }
+    .bank-payment-panel .bank-row:last-child { border-bottom: 0; }
+    .voucher-upload-panel { background: #fafbff; border-style: dashed; border-color: #b8c2f3; }
+    .payment-panel-icon { display: inline-grid; place-items: center; flex: 0 0 auto; width: 30px; height: 30px; border-radius: 8px; background: #eef2ff; color: #4361ee; }
+    .payment-panel-icon svg { width: 17px; height: 17px; }
+    .voucher-upload-panel .filepond--root { margin: .65rem 0 0; }
+    .voucher-upload-panel .filepond--drop-label { min-height: 82px; }
+    .form-panel { border: 1px solid #e5e9f2; border-radius: 12px; padding: .85rem; background: #fff; }
+    .inscription-shell .card { margin-bottom: 0; }
+    .inscription-shell hr { margin: .25rem 0; }
+    .inscription-shell .table > :not(caption) > * > * { padding: .65rem .75rem; vertical-align: middle; }
+    .inscription-shell .inscription-intro { padding: .8rem 1rem !important; margin-bottom: .25rem !important; }
     .form-error-summary { border-left: 4px solid #e7515a; }
     .field-valid { border-color: #00ab55 !important; background-color: #f4fff9 !important; }
     .submit-help { color: #667085; font-size: .82rem; }
     @media (max-width: 767.98px) {
-        .inscription-shell .widget-content-area { padding-left: 12px; padding-right: 12px; }
-        .category-row td { padding-top: 1rem; padding-bottom: 1rem; }
+        .inscription-shell { font-size: .93rem; }
+        .inscription-shell .layout-top-spacing { margin-top: .75rem !important; }
+        .inscription-shell .widget-header h4 { padding: .75rem 0 .4rem; font-size: 1.1rem; }
+        .inscription-shell .widget-content-area { padding: .65rem .7rem 1rem; }
+        .inscription-shell form.row { --bs-gutter-x: .6rem; --bs-gutter-y: .6rem; }
+        .inscription-step { gap: .5rem; font-size: .95rem; }
+        .inscription-step-number { width: 27px; height: 27px; }
+        .form-panel, .tour-card { padding: .75rem !important; }
+        .category-row td { padding-top: .7rem !important; padding-bottom: .7rem !important; }
+        .inscription-shell .table th:last-child, .inscription-shell .table td:last-child { width: 88px !important; }
+        .payment-choice { min-height: 54px; padding: .5rem 2rem .5rem .6rem; gap: .5rem; }
+        .payment-choice .badge { font-size: .68rem; }
+        .course-card .d-flex.justify-content-between { display: grid !important; grid-template-columns: minmax(0, 1fr) auto; }
+        .course-card .text-nowrap { font-size: .92rem; }
+        .course-card small { overflow-wrap: anywhere; }
+        #dv_tranfer .card-body { padding: .8rem !important; }
+        #dv_tranfer .list-group-item { padding: .45rem 0 !important; gap: .75rem; }
+        #dv_tranfer .list-group-item span:last-child { word-break: break-word; }
+        .bank-payment-panel, .voucher-upload-panel { padding: .75rem; }
+        .bank-payment-panel .bank-row { display: block; padding: .4rem 0; }
+        .bank-payment-panel .bank-row span { display: block; text-align: left !important; }
+        .bank-payment-panel .bank-row span:last-child { margin-top: .1rem; overflow-wrap: anywhere; }
+        .voucher-upload-panel .filepond--drop-label { min-height: 72px; }
+        #paymentotal { font-size: 1.35rem; }
+        .inscription-shell .btn-lg { padding: .65rem 1rem; font-size: 1rem; }
     }
 </style>
 
@@ -475,84 +527,31 @@
                                         <span>{{ __('FORMA DE PAGO') }}</span>
                                     </div>
 
-                                    <div class="text-center">
-
-                                        <div class="form-check form-check-primary form-check-inline">
-                                            <input class="form-check-input cursor-pointer" type="radio" name="payment_method" value="Transferencia/Depósito" id="payment_method_transfer" @if(old('payment_method', 'Transferencia/Depósito') === 'Transferencia/Depósito') checked @endif>
-                                            <label class="form-check-label mb-0 cursor-pointer" for="payment_method_transfer">
-                                                Transferencia bancaria o depósito
-                                            </label>
-                                        </div>
-
-                                        <div class="form-check form-check-primary form-check-inline">
-                                            <input class="form-check-input cursor-pointer" type="radio" name="payment_method" value="Tarjeta" id="payment_method_card" @if(old('payment_method') === 'Tarjeta') checked @endif>
-                                            <label class="form-check-label mb-0 cursor-pointer" for="payment_method_card">
-                                                Tarjeta de crédito/débito
-                                            </label>
-                                        </div>
-                                        
+                                    <div class="row g-3">
+                                        <div class="col-md-6"><label class="payment-choice" for="payment_method_transfer"><input class="form-check-input" type="radio" name="payment_method" value="Transferencia/Depósito" id="payment_method_transfer" @if(old('payment_method','Transferencia/Depósito')==='Transferencia/Depósito') checked @endif><span class="payment-choice-icon"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 10h18"></path><path d="M5 10v8"></path><path d="M9 10v8"></path><path d="M15 10v8"></path><path d="M19 10v8"></path><path d="M3 18h18"></path><path d="m12 3 9 4H3l9-4Z"></path></svg></span><strong>Transferencia o depósito</strong><span class="badge badge-light-success">Disponible</span></label></div>
+                                        <div class="col-md-6"><label class="payment-choice" for="payment_method_card"><input class="form-check-input" type="radio" name="payment_method" value="Tarjeta" id="payment_method_card" @if(old('payment_method')==='Tarjeta') checked @endif><span class="payment-choice-icon"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"></rect><path d="M2 10h20"></path><path d="M6 15h2"></path></svg></span><strong>Tarjeta</strong><span class="badge badge-light-info">Próximamente</span></label></div>
                                     </div>
 
                                     <div id="dv_tranfer" class="mt-3">
-
-                                        <div class="p-1 d-flex justify-content-center"> 
-
-                                            <!-- Contenedor principal más estrecho y con bordes más redondeados -->
-                                            <div class="card shadow-sm rounded-4 border-0 w-100" style="max-width: 400px;">
-                                                <div class="card-body p-3 p-sm-4">
-                                                    
-                                                    <!-- Lista de datos súper compacta -->
-                                                    <ul class="list-group list-group-flush mb-3 text-sm">
-                                                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
-                                                            <span class="text-muted">Beneficiario</span>
-                                                            <span class="fw-bold text-end">ASOCIACION CONGRESO LIMA-PERU</span>
-                                                        </li>
-                                                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
-                                                            <span class="text-muted">Banco de Crédito del Perú</span>
-                                                            <span class="fw-bold text-end">BCP</span>
-                                                        </li>
-                                                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
-                                                            <span class="text-muted">Cuenta (Dólares)</span>
-                                                            <span class="fw-bold text-primary fs-6">194-7417292-1-50</span>
-                                                        </li>
-                                                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
-                                                            <span class="text-muted">CCI</span>
-                                                            <span class="text-muted fst-italic">002 194 007417292150 99</span>
-                                                        </li>
-                                                    </ul>
-
-                                                    <!-- Sección Internacional (Solo complementos) -->
-                                                    <div class="bg-soft rounded-3 p-3 border border-light-subtle">
-                                                        <div class="d-flex align-items-center mb-2">
-                                                            <span class="badge bg-secondary me-2" style="font-size: 0.7rem;">Internacional</span>
-                                                            <span class="fw-bold text-dark text-sm">Datos adicionales</span>
-                                                        </div>
-                                                        <div class="d-flex justify-content-between mb-1 text-sm">
-                                                            <span class="text-muted">SWIFT</span>
-                                                            <span class="fw-bold">BCPLPEPL</span>
-                                                        </div>
-                                                        <div class="d-flex justify-content-between text-sm">
-                                                            <span class="text-muted me-3">Dirección</span>
-                                                            <span class="text-end fw-semibold">Calle Centenario 156<br>La Molina, Lima</span>
-                                                        </div>
-                                                    </div>
-
+                                        <div class="row g-3 align-items-stretch">
+                                            <div class="col-lg-7">
+                                                <div class="bank-payment-panel">
+                                                    <div class="d-flex align-items-center justify-content-between gap-2 mb-1"><div class="d-flex align-items-center gap-2"><span class="payment-panel-icon" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 10h18"></path><path d="M5 10v8"></path><path d="M9 10v8"></path><path d="M15 10v8"></path><path d="M19 10v8"></path><path d="M3 18h18"></path><path d="m12 3 9 4H3l9-4Z"></path></svg></span><strong>Realiza la transferencia</strong></div><span class="badge badge-light-primary">Cuenta en dólares</span></div>
+                                                    <div class="bank-row"><span class="text-muted">Beneficiario</span><span class="fw-bold text-end">ASOCIACION CONGRESO LIMA-PERU</span></div>
+                                                    <div class="bank-row"><span class="text-muted">Banco</span><span class="fw-bold text-end">BCP · Banco de Crédito del Perú</span></div>
+                                                    <div class="bank-row"><span class="text-muted">Cuenta</span><span class="fw-bold text-primary text-end">194-7417292-1-50</span></div>
+                                                    <div class="bank-row"><span class="text-muted">CCI</span><span class="fw-semibold text-end">002 194 007417292150 99</span></div>
+                                                    <div class="mt-2 p-2 rounded bg-light"><div class="d-flex justify-content-between"><small class="text-muted">SWIFT internacional</small><small class="fw-bold">BCPLPEPL</small></div><small class="text-muted d-block mt-1">Dirección: Calle Centenario 156, La Molina, Lima.</small></div>
                                                 </div>
                                             </div>
-
-                                        </div>
-
-
-                                        <div class="row">
-                                            <div class="col-md-2"></div>
-                                            <div class="col-md-8">
-                                                <div id="dv_voucher_file" class="mt-2">
-                                                    <label for="voucher_file" class="d-block text-center">Adjuntar comprobante de pago. <small id="cprequired" class="text-danger">(Requerido)</small></label>
+                                            <div class="col-lg-5">
+                                                <div class="voucher-upload-panel" id="dv_voucher_file">
+                                                    <div class="d-flex gap-2 align-items-start"><span class="payment-panel-icon" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path><path d="M14 2v6h6"></path><path d="M12 18v-6"></path><path d="m9 15 3-3 3 3"></path></svg></span><div><strong class="d-block">Adjunta tu comprobante</strong><small class="text-muted">PDF, JPG o PNG · máximo 10 MB.</small></div></div>
                                                     <input type="file" name="voucher_file" id="voucher_file" class="file-control" accept="application/pdf,image/jpeg,image/png">
+                                                    <small id="cprequired" class="text-danger d-block mt-1">El comprobante es requerido para validar el pago.</small>
                                                     {!!$errors->first("voucher_file", "<span class='text-danger d-block'>:message</span>")!!}
                                                 </div>
                                             </div>
-                                            <div class="col-md-2"></div>
                                         </div>
                                     </div>
 

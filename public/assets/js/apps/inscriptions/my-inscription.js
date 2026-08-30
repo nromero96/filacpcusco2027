@@ -567,6 +567,9 @@ inputPaymentMethod.forEach(radio => {
 
 function handlePaymentMethod(){
     const selectedValuePaymentMethod = document.querySelector('input[type="radio"][name="payment_method"]:checked').value;
+    document.querySelectorAll('.payment-choice').forEach(choice => {
+      choice.classList.toggle('is-selected', Boolean(choice.querySelector('input:checked')));
+    });
     if(selectedValuePaymentMethod === 'Transferencia/Depósito'){
         dvTranfer.classList.remove('d-none');
         dvCard.classList.add('d-none');
