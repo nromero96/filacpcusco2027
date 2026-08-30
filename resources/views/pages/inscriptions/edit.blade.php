@@ -4,7 +4,7 @@
 @section('content')
 
 <style>
-    .inscription-shell { --inscription-primary: #4361ee; --inscription-soft: #eef2ff; }
+    .inscription-shell { --inscription-primary: #882c31; --inscription-soft: #eef2ff; }
     .inscription-intro { background: linear-gradient(135deg, #eef2ff 0%, #f8faff 100%); border: 1px solid #dce4ff; border-radius: 14px; }
     .inscription-step { display: flex; align-items: center; gap: .65rem; color: #344054; font-weight: 700; }
     .inscription-step-number { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--inscription-primary); color: #fff; font-size: .85rem; }
