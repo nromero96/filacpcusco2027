@@ -150,7 +150,7 @@
                                     <div class="col-md-4 align-self-center">
 
                                         @if(\Auth::user()->hasRole('Participante'))
-                                            <a href="{{ route('inscriptions.create') }}" class="btn btn-secondary">Nuevo</a>
+                                            <a href="{{ route('inscriptions.myinscription') }}" class="btn btn-secondary">Nuevo</a>
                                         @endif
 
                                         @if(\Auth::user()->hasRole('Administrador') || \Auth::user()->hasRole('Secretaria'))
@@ -207,12 +207,15 @@
                                             <th scope="col">{{__("Pago")}}</th>
                                             <th scope="col">{{__("Estado")}}</th>
                                             <th scope="col">{{__("Fecha")}}</th>
+                                            @if(Auth::user()->hasRole('Administrador'))
+                                                <th scope="col" width="90">{{ __('Acciones') }}</th>
+                                            @endif
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @if ($inscriptions->isEmpty())
                                             <tr>
-                                                <td colspan="7" class="text-center">
+                                                <td colspan="{{ Auth::user()->hasRole('Administrador') ? 8 : 7 }}" class="text-center">
                                                     <h6 class="mt-2">{{__("No hay inscripciones registradas")}}</h6>
                                                 </td>
                                             </tr>
@@ -279,6 +282,13 @@
                                                     <td>
                                                         {{ $inscription->created_at }}
                                                     </td>
+                                                    @if(Auth::user()->hasRole('Administrador'))
+                                                        <td class="text-center">
+                                                            <a href="{{ route('inscriptions.edit', $inscription->id) }}" class="btn btn-sm btn-primary px-2" title="Editar inscripción" aria-label="Editar inscripción #{{ $inscription->id }}">
+                                                                {{ __('Editar') }}
+                                                            </a>
+                                                        </td>
+                                                    @endif
                                                 </tr>
                                             @endforeach
                                         @endif

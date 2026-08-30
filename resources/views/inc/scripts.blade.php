@@ -88,7 +88,8 @@
             {{-- Inscriptions --}}
             <script src="{{ asset('plugins/src/filepond/filepond.min.js') }}"></script>
             <script src="{{ asset('plugins/src/filepond/FilePondPluginFileValidateType.min.js') }}"></script>
-            <script src="{{ asset('assets/js/apps/inscriptions/create-manual.js') }}?v={{ config('app.version') }}"></script>
+            <script src="{{ asset('plugins/src/filepond/filepondPluginFileValidateSize.min.js') }}"></script>
+            <script src="{{ asset('assets/js/apps/inscriptions/my-inscription.js') }}?v={{ config('app.version') }}"></script>
             @break
 
         @case('inscriptions_rejects')

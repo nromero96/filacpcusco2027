@@ -157,7 +157,7 @@
                                 <h6>
                                     {{__("Detalle de la inscripción")}}
 
-                                    @if(\Auth::user()->hasRole('Administrador') || \Auth::user()->hasRole('Secretaria'))
+                                    @if(\Auth::user()->hasRole('Administrador'))
                                         <a href="{{ route('inscriptions.edit', $inscription->id) }}" class="btn btn-light-primary p-0 btn-sm ms-2 btneditinsc">
                                             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>

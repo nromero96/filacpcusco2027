@@ -258,7 +258,7 @@ class UserController extends Controller
 
 
         //redirect inscription create
-        return redirect()->route('inscriptions.create')->with('info', 'Para completar su inscripción, elija una categoría y adjunte el comprobante de pago. La inscripción se validará una vez recibido y verificado el comprobante.');
+        return redirect()->route('inscriptions.myinscription')->with('info', 'Para completar su inscripción, elija una categoría y adjunte el comprobante de pago. La inscripción se validará una vez recibido y verificado el comprobante.');
         
     }
 

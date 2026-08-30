@@ -50,7 +50,7 @@
                         <div class="row">
                             <div class="col-xl-12 col-md-12 col-sm-12 mb-2 col-12">
                                 <h4>
-                                    Completa tu inscripción
+                                    {{ !empty($manualRegistration) ? 'Registrar inscripción manual' : 'Completa tu inscripción' }}
                                 </h4>
                             </div>
                         </div>
@@ -59,13 +59,13 @@
                         <div class="inscription-intro p-3 mb-3">
                             <div class="d-flex flex-column flex-md-row justify-content-between gap-2 align-items-md-center">
                                 <div>
-                                    <div class="fw-bold text-dark">Tu inscripción está a pocos pasos</div>
+                                    <div class="fw-bold text-dark">{{ !empty($manualRegistration) ? 'Registro administrativo de participante' : 'Tu inscripción está a pocos pasos' }}</div>
                                     <small class="text-muted">Los campos marcados con <span class="text-danger">*</span> son obligatorios. Revisa los datos antes de continuar.</small>
                                 </div>
                                 <span class="badge badge-light-primary px-3 py-2">Formulario seguro</span>
                             </div>
                         </div>
-                        <form class="row g-3" action="{{ route('inscriptions.storemyinscription') }}" method="POST" id="formInscription" enctype="multipart/form-data" novalidate>
+                        <form class="row g-3" action="{{ !empty($manualRegistration) ? route('inscriptions.storemanualregistrationparticipant') : route('inscriptions.storemyinscription') }}" method="POST" id="formInscription" enctype="multipart/form-data" novalidate>
                             @csrf
                             <div class="col-12 @if(!$errors->any()) d-none @endif" id="formErrorSummary" tabindex="-1" aria-live="assertive">
                                 <div class="alert alert-danger form-error-summary mb-0">
@@ -186,9 +186,21 @@
 
                             <div class="col-md-6">
                                 <label for="inputEmail" class="form-label text-muted mb-0">{{__("Email")}} <span class="text-danger">*</span></label>
-                                <input type="email" name="email" class="form-control" id="inputEmail" value="{{ old('email', $user->email) }}" readonly>
+                                <input type="email" name="email" class="form-control" id="inputEmail" value="{{ old('email', $user->email) }}" @if(empty($manualRegistration)) readonly @endif required>
                                 {!!$errors->first("email", "<span class='text-danger'>:message</span>")!!}
                             </div>
+
+                            @if(!empty($manualRegistration))
+                                <div class="col-md-6">
+                                    <label for="password" class="form-label text-muted mb-0">{{ __('Contraseña') }} <span class="text-danger">*</span></label>
+                                    <input type="password" name="password" class="form-control" id="password" minlength="8" autocomplete="new-password" required>
+                                    {!!$errors->first("password", "<span class='text-danger'>:message</span>")!!}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="password_confirmation" class="form-label text-muted mb-0">{{ __('Confirmar contraseña') }} <span class="text-danger">*</span></label>
+                                    <input type="password" name="password_confirmation" class="form-control" id="password_confirmation" minlength="8" autocomplete="new-password" required>
+                                </div>
+                            @endif
 
                             <div class="col-md-6">
                                 <label for="inputSolapinName" class="form-label text-muted mb-0">{{__("Solapín/Gafete")}} <span class="text-danger">*</span> <small class="fw-normal">({{ __("Un nombre y un apellido") }})</small></label>
@@ -498,7 +510,10 @@
                             </div>
 
                             <div class="col-12 text-center">
-                                <button type="submit" class="btn btn-primary btn-lg" id="btnSubInscription">{{__("Inscribirme Ahora")}}</button>
+                                @if(!empty($manualRegistration))
+                                    <a href="{{ route('inscriptions.index') }}" class="btn btn-secondary btn-lg">{{ __('Cancelar') }}</a>
+                                @endif
+                                <button type="submit" class="btn btn-primary btn-lg" id="btnSubInscription">{{ !empty($manualRegistration) ? __('Registrar inscripción') : __('Inscribirme Ahora') }}</button>
                                 <div class="submit-help mt-2" id="submitHelp">Al continuar confirmas que la información ingresada es correcta.</div>
                             </div>
                         </form>

@@ -48,7 +48,7 @@ class UploadController extends Controller
 
     private function processFile($file) {
         $originalFilename = basename($file->getClientOriginalName());
-        $extension = $file->getClientOriginalExtension();
+        $extension = $file->extension();
 
         // Genera un identificador único
         $uniqueIdentifier = uniqid();

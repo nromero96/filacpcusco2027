@@ -59,7 +59,7 @@
                                             <tr>
                                                 <td colspan="5" class="text-center">
                                                     <h6 class="mt-2">{{__("No hay inscripciones registradas")}}</h6>
-                                                    <a href="{{ route('inscriptions.create') }}" class="btn btn-primary mb-4 ms-3 me-3">{{__("Comprar Nuevo")}}</a>
+                                                    <a href="{{ route('inscriptions.manualregistrationparticipant') }}" class="btn btn-primary mb-4 ms-3 me-3">{{__("Registrar Nuevo")}}</a>
                                                 </td>
                                             </tr>
                                         @else
