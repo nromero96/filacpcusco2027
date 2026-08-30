@@ -28,6 +28,7 @@ use App\Http\Controllers\PosterController;
 use App\Http\Controllers\GafeteController;
 use App\Http\Controllers\CertificadoController;
 use App\Http\Controllers\FileManagerController;
+use App\Http\Controllers\CourseController;
 
 
 use Illuminate\Support\Facades\Artisan;
@@ -149,6 +150,9 @@ Route::group(['middleware' => ['auth', 'check.inscription','ensureStatusActive']
 
     Route::get('/manual-registration-participant', [InscriptionController::class, 'formManualRegistrationParticipant'])->name('inscriptions.manualregistrationparticipant');
     Route::post('/store-manual-registration-participant', [InscriptionController::class, 'storeManualRegistrationParticipant'])->name('inscriptions.storemanualregistrationparticipant');
+
+    Route::get('courses/{course}/buyers', [CourseController::class, 'buyers'])->name('courses.buyers');
+    Route::resource('courses', CourseController::class)->except(['show', 'destroy'])->names('courses');
 
     Route::get('payment-niubiz/{inscription}', [InscriptionController::class, 'paymentNiubiz'])->name('inscriptions.paymentniubiz');
     Route::post('confirm-payment-niubiz', [InscriptionController::class, 'confirmPaymentNiubiz'])->name('inscriptions.confirmpaymentniubiz');

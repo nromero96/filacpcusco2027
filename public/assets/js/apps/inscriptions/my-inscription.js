@@ -114,6 +114,8 @@ document.addEventListener("DOMContentLoaded", function () {
 // Obtén todos los elementos radio y checkboxes
 const categoryRadioButtons = document.querySelectorAll('input[type="radio"][name="category_inscription_id"]');
 const accompanistCheckboxes = document.querySelectorAll('input[type="checkbox"][name="accompanist"]');
+const courseCheckboxes = document.querySelectorAll('.course-option');
+const coursesTotalElement = document.getElementById('text_courses_total');
 const paymentotalElement = document.getElementById('paymentotal');
 
 // Función para calcular el precio total
@@ -175,13 +177,35 @@ function calculateTotalPrice() {
     }
   });
 
+  let coursesTotal = 0;
+  courseCheckboxes.forEach(checkbox => {
+    const card = checkbox.closest('.course-card');
+    if (card) card.classList.toggle('is-selected', checkbox.checked);
+    if (checkbox.checked) coursesTotal += parseFloat(checkbox.dataset.coursePrice) || 0;
+  });
+  totalPrice += coursesTotal;
+  if (coursesTotalElement) coursesTotalElement.textContent = coursesTotal.toFixed(2);
+
+  const concepts = [];
+  if (document.querySelector('input[name="category_inscription_id"]:checked')) concepts.push('categoría');
+  if (document.querySelector('input[name="accompanist"]:checked')) concepts.push('acompañante');
+  const selectedCoursesCount = document.querySelectorAll('.course-option:checked').length;
+  if (selectedCoursesCount === 1) concepts.push('1 curso');
+  if (selectedCoursesCount > 1) concepts.push(selectedCoursesCount + ' cursos');
+  const totalConceptsText = document.getElementById('totalConceptsText');
+  if (totalConceptsText) {
+    totalConceptsText.textContent = concepts.length
+      ? 'Incluye: ' + concepts.join(', ') + '.'
+      : 'Selecciona los conceptos de la inscripción.';
+  }
+
   if(totalPrice == 0){
 
   }
 
 
   // Actualiza el elemento HTML con el precio total
-  paymentotalElement.textContent = totalPrice; // Ajusta el formato según necesites
+  paymentotalElement.textContent = totalPrice.toFixed(2);
 }
 
 // Agrega un event listener para los cambios en los radios y checkboxes
@@ -190,6 +214,10 @@ categoryRadioButtons.forEach(radio => {
   radio.addEventListener('change', calculateTotalPrice);
   radio.addEventListener('change', updateSelectedCategoryStyle);
   radio.addEventListener('change', clearFormError);
+});
+
+courseCheckboxes.forEach(checkbox => {
+  checkbox.addEventListener('change', calculateTotalPrice);
 });
 
 document.querySelectorAll('.category-row').forEach(row => {
@@ -235,6 +263,18 @@ const btnClearSpecialCode = document.getElementById('clear_specialcode');
 const specialCodeVerify = document.getElementById('specialcode_verify');
 const descriptionSpecialCode = document.getElementById('sms_valid_vc');
 const dv_payment = document.getElementById('dv_payment');
+
+function updateFreeSpecialCodePaymentForCourses() {
+  const selectedCategory = document.querySelector('input[type="radio"][name="category_inscription_id"]:checked');
+  const isValidatedFreeCode = selectedCategory && selectedCategory.dataset.usesSpecialCode === '1'
+    && specialCodeVerify.value === 'valid' && parseFloat(selectedCategory.dataset.catprice || 0) === 0;
+  if (!isValidatedFreeCode) return;
+  const hasPaidCourses = Array.from(courseCheckboxes).some(option => option.checked && parseFloat(option.dataset.coursePrice || 0) > 0);
+  dv_payment.classList.toggle('d-none', !hasPaidCourses);
+  updateInvoiceAvailability();
+}
+
+courseCheckboxes.forEach(option => option.addEventListener('change', updateFreeSpecialCodePaymentForCourses));
 
 const inputVoucherFile = document.getElementById('voucher_file');
 
@@ -427,7 +467,8 @@ btnValidateSpecialCode.addEventListener('click', function(){
           dvDocumentFile.classList.add('d-none');
           inputDocumentFile.removeAttribute('required');
 
-          if (response.payment_required === 'Si') {
+          const hasPaidCourses = Array.from(courseCheckboxes).some(option => option.checked && parseFloat(option.dataset.coursePrice || 0) > 0);
+          if (response.payment_required === 'Si' || hasPaidCourses) {
             dv_payment.classList.remove('d-none');
           } else {
             dv_invoice.classList.add('d-none');

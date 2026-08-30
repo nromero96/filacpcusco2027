@@ -15,6 +15,7 @@ use App\Models\Statusnote;
 use App\Models\SpecialCode;
 use App\Models\BeneficiarioBeca;
 use App\Models\Country;
+use App\Models\Course;
 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Pagination\Paginator;
@@ -28,6 +29,7 @@ use Illuminate\Support\Facades\DB;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use App\Rules\PhoneNumber;
 use App\Rules\ValidRuc;
 
@@ -427,8 +429,9 @@ class InscriptionController extends Controller
 
             //notes status
             $statusnotes = StatusNote::where('inscription_id', $id)->orderBy('id', 'desc')->get();
+            $purchasedCourses = Inscription::findOrFail($id)->courses()->get();
 
-            return view('pages.inscriptions.show')->with($data)->with('inscription', $inscription)->with('accompanist', $accompanist)->with('paymentcard', $paymentcard)->with('statusnotes', $statusnotes);
+            return view('pages.inscriptions.show')->with($data)->with('inscription', $inscription)->with('accompanist', $accompanist)->with('paymentcard', $paymentcard)->with('statusnotes', $statusnotes)->with('purchasedCourses', $purchasedCourses);
         }else{
             return redirect()->route('inscriptions.index')->with('error', 'No tiene permisos para ver esta inscripción');
         }
@@ -491,6 +494,9 @@ class InscriptionController extends Controller
                 ->orderBy('order', 'asc')
                 ->get();
             $countries = Country::orderByRaw("CASE WHEN name = 'Perú' THEN 0 ELSE 1 END, name ASC")->get();
+            $courses = Course::where('status', 'active')
+                ->orWhereHas('inscriptions', fn ($query) => $query->where('inscriptions.id', $id))
+                ->withCount('inscriptions')->orderBy('course_date')->orderBy('name')->get();
 
             $paymentcard = Payment::where('inscription_id', $id)->first();
             $accompanist = Accompanist::find($inscription->accompanist_id);
@@ -498,7 +504,8 @@ class InscriptionController extends Controller
             //notes status
             $statusnotes = StatusNote::where('inscription_id', $id)->orderBy('id', 'desc')->get();
 
-            return view('pages.inscriptions.edit')->with($data)->with('inscription', $inscription)->with('accompanist', $accompanist)->with('paymentcard', $paymentcard)->with('statusnotes', $statusnotes)->with('category_inscriptions', $category_inscriptions)->with('countries', $countries);
+            $selectedCourses = $inscription->courses()->get();
+            return view('pages.inscriptions.edit')->with($data)->with('inscription', $inscription)->with('accompanist', $accompanist)->with('paymentcard', $paymentcard)->with('statusnotes', $statusnotes)->with('category_inscriptions', $category_inscriptions)->with('countries', $countries)->with('courses', $courses)->with('selectedCourseIds', $selectedCourses->pluck('id')->all())->with('selectedCoursePrices', $selectedCourses->pluck('pivot.unit_price', 'id')->all());
 
         }else{
             return redirect()->route('inscriptions.index')->with('error', 'No tiene permisos para editar esta inscripción');
@@ -567,11 +574,22 @@ class InscriptionController extends Controller
                 'invoice_social_reason' => [Rule::requiredIf($needsInvoice), 'nullable', 'string', 'max:255'],
                 'invoice_address' => [Rule::requiredIf($needsInvoice), 'nullable', 'string', 'max:255'],
                 'payment_method' => ['required', Rule::in(['Transferencia/Depósito', 'Tarjeta'])],
+                'course_ids' => 'nullable|array',
+                'course_ids.*' => ['integer', 'distinct', Rule::exists('courses', 'id')],
                 'document_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
                 'voucher_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
             ]);
 
             DB::transaction(function () use ($request, $validated, $inscription, $user, $needsInvoice) {
+                $existingCoursePrices = $inscription->courses()->get()->pluck('pivot.unit_price', 'id');
+                $selectedCourses = Course::whereIn('id', $validated['course_ids'] ?? [])->lockForUpdate()->get();
+                foreach ($selectedCourses as $course) {
+                    $otherBuyers = $course->inscriptions()->where('inscriptions.id', '!=', $inscription->id)->count();
+                    if ($course->capacity && $otherBuyers >= $course->capacity) {
+                        throw ValidationException::withMessages(['course_ids' => "El curso {$course->name} ya no tiene cupos disponibles."]);
+                    }
+                }
+
                 $user->fill(collect($validated)->only([
                     'name', 'lastname', 'second_lastname', 'document_type', 'document_number',
                     'country', 'state', 'city', 'address', 'postal_code', 'phone_code',
@@ -596,7 +614,12 @@ class InscriptionController extends Controller
                 $inscription->category_inscription_id = $validated['category_inscription_id'];
                 $inscription->price_category = $validated['price_category'];
                 $inscription->price_accompanist = $validated['price_accompanist'];
-                $inscription->total = $validated['price_category'] + $validated['price_accompanist'];
+                $coursePurchaseData = $selectedCourses->mapWithKeys(fn ($course) => [
+                    $course->id => ['unit_price' => $existingCoursePrices[$course->id] ?? $course->price],
+                ])->all();
+                $inscription->courses()->sync($coursePurchaseData);
+                $courseTotal = collect($coursePurchaseData)->sum('unit_price');
+                $inscription->total = $validated['price_category'] + $validated['price_accompanist'] + $courseTotal;
                 $inscription->special_code = $validated['special_code'] ?? null;
                 $inscription->invoice = $validated['country'] === 'Perú' ? $validated['invoice'] : 'no';
                 $inscription->invoice_ruc = $needsInvoice() ? $validated['invoice_ruc'] : null;
@@ -665,6 +688,7 @@ class InscriptionController extends Controller
         //get CategoryInscription
         $category_inscriptions = CategoryInscription::orderBy('order', 'asc')->get();
         $countries = Country::orderByRaw("CASE WHEN name = 'Perú' THEN 0 ELSE 1 END, name ASC")->get();
+        $courses = Course::where('status', 'active')->withCount('inscriptions')->orderBy('course_date')->orderBy('name')->get();
 
         $user = User::find($id);
 
@@ -676,7 +700,7 @@ class InscriptionController extends Controller
             $data['beneficiariobeca'] = 'no';
         }
 
-        return view('pages.inscriptions.my-inscription')->with($data)->with('category_inscriptions', $category_inscriptions)->with('countries', $countries)->with('beneficiariobeca', $beneficiariobeca)->with('user', $user);
+        return view('pages.inscriptions.my-inscription')->with($data)->with('category_inscriptions', $category_inscriptions)->with('countries', $countries)->with('beneficiariobeca', $beneficiariobeca)->with('user', $user)->with('courses', $courses);
     }
 
     public function storeMyInscription(Request $request){
@@ -696,7 +720,7 @@ class InscriptionController extends Controller
         $needsDocument = fn () => $selectedCategory && $selectedCategory->requires_document;
         $needsVoucher = fn () => $request->payment_method === 'Transferencia/Depósito'
             && $selectedCategory
-            && $selectedCategory->requires_voucher;
+            && ($selectedCategory->requires_voucher || count($request->input('course_ids', [])) > 0);
         $temporaryUploadExists = function ($attribute, $value, $fail) {
             if ($value === null || $value === '') {
                 return;
@@ -758,6 +782,8 @@ class InscriptionController extends Controller
             'invoice_social_reason' => [Rule::requiredIf($needsInvoice), 'nullable', 'string', 'max:255'],
             'invoice_address' => [Rule::requiredIf($needsInvoice), 'nullable', 'string', 'max:255'],
             'payment_method' => ['required', Rule::in(['Transferencia/Depósito', 'Tarjeta'])],
+            'course_ids' => 'nullable|array',
+            'course_ids.*' => ['integer', 'distinct', Rule::exists('courses', 'id')->where(fn ($query) => $query->where('status', 'active'))],
             'document_file' => [Rule::requiredIf($needsDocument), 'nullable', 'string', $temporaryUploadExists],
             'voucher_file' => [Rule::requiredIf($needsVoucher), 'nullable', 'string', $temporaryUploadExists],
         ]);
@@ -765,6 +791,14 @@ class InscriptionController extends Controller
         DB::beginTransaction();
 
         try {
+            $selectedCourses = Course::whereIn('id', $validatedData['course_ids'] ?? [])->lockForUpdate()->get();
+            foreach ($selectedCourses as $course) {
+                if ($course->capacity && $course->inscriptions()->count() >= $course->capacity) {
+                    DB::rollBack();
+                    return redirect()->back()->withErrors(['course_ids' => "El curso {$course->name} ya no tiene cupos disponibles."])->withInput();
+                }
+            }
+
             // Serializa los intentos del mismo usuario y evita dobles inscripciones.
             $user = User::whereKey($iduser)->lockForUpdate()->firstOrFail();
             if (Inscription::where('user_id', $iduser)->exists()) {
@@ -881,6 +915,13 @@ class InscriptionController extends Controller
 
             $inscription->save();
 
+            $coursePurchaseData = $selectedCourses->mapWithKeys(fn ($course) => [
+                $course->id => ['unit_price' => $course->price],
+            ])->all();
+            $inscription->courses()->attach($coursePurchaseData);
+            $inscription->total += $selectedCourses->sum('price');
+            $inscription->save();
+
             // Manejo de documentos temporales
             $documentFile = trim($request->document_file, '[]"');
             $temporaryfile_document_file = TemporaryFile::where('folder', $documentFile)->first();
@@ -957,6 +998,7 @@ class InscriptionController extends Controller
         //get CategoryInscription
         $category_inscriptions = CategoryInscription::orderBy('order', 'asc')->get();
         $countries = Country::orderByRaw("CASE WHEN name = 'Perú' THEN 0 ELSE 1 END, name ASC")->get();
+        $courses = Course::where('status', 'active')->withCount('inscriptions')->orderBy('course_date')->orderBy('name')->get();
 
         if (\Auth::user()->hasRole('Administrador')) {
             return view('pages.inscriptions.my-inscription')
@@ -965,6 +1007,7 @@ class InscriptionController extends Controller
                 ->with('countries', $countries)
                 ->with('beneficiariobeca', null)
                 ->with('user', new User())
+                ->with('courses', $courses)
                 ->with('manualRegistration', true);
         }else{
             return redirect()->route('inscriptions.index')->with('error', 'No tiene permisos para ver esta vista');
@@ -983,7 +1026,8 @@ class InscriptionController extends Controller
         $hasAccompanist = fn () => $request->accompanist === 'si';
         $needsInvoice = fn () => $request->country === 'Perú' && $request->invoice === 'si';
         $needsDocument = fn () => $selectedCategory && $selectedCategory->requires_document;
-        $needsVoucher = fn () => $request->payment_method === 'Transferencia/Depósito' && $selectedCategory && $selectedCategory->requires_voucher;
+        $needsVoucher = fn () => $request->payment_method === 'Transferencia/Depósito' && $selectedCategory
+            && ($selectedCategory->requires_voucher || count($request->input('course_ids', [])) > 0);
         $temporaryUploadExists = function ($attribute, $value, $fail) {
             if ($value === null || $value === '') return;
             if (!TemporaryFile::where('folder', trim($value, '[]"'))->exists()) {
@@ -1027,6 +1071,8 @@ class InscriptionController extends Controller
             'invoice_social_reason' => [Rule::requiredIf($needsInvoice), 'nullable', 'string', 'max:255'],
             'invoice_address' => [Rule::requiredIf($needsInvoice), 'nullable', 'string', 'max:255'],
             'payment_method' => ['required', Rule::in(['Transferencia/Depósito', 'Tarjeta'])],
+            'course_ids' => 'nullable|array',
+            'course_ids.*' => ['integer', 'distinct', Rule::exists('courses', 'id')->where(fn ($query) => $query->where('status', 'active'))],
             'document_file' => [Rule::requiredIf($needsDocument), 'nullable', 'string', $temporaryUploadExists],
             'voucher_file' => [Rule::requiredIf($needsVoucher), 'nullable', 'string', $temporaryUploadExists],
         ]);
@@ -1034,6 +1080,14 @@ class InscriptionController extends Controller
         DB::beginTransaction();
 
         try {
+            $selectedCourses = Course::whereIn('id', $request->input('course_ids', []))->lockForUpdate()->get();
+            foreach ($selectedCourses as $course) {
+                if ($course->capacity && $course->inscriptions()->count() >= $course->capacity) {
+                    DB::rollBack();
+                    return redirect()->back()->withErrors(['course_ids' => "El curso {$course->name} ya no tiene cupos disponibles."])->withInput();
+                }
+            }
+
             $specialAmount = null;
             if ($isSpecialCategory()) {
                 $specialCode = SpecialCode::where('code', $request->specialcode)->lockForUpdate()->first();
@@ -1120,6 +1174,12 @@ class InscriptionController extends Controller
             $inscription->voucher_file = '';
             $inscription->save();
 
+            $inscription->courses()->attach($selectedCourses->mapWithKeys(fn ($course) => [
+                $course->id => ['unit_price' => $course->price],
+            ])->all());
+            $inscription->total += $selectedCourses->sum('price');
+            $inscription->save();
+
             // Manejo de documentos temporales
             $documentFile = trim($request->document_file, '[]"');
             $temporaryfile_document_file = TemporaryFile::where('folder', $documentFile)->first();
@@ -1184,18 +1244,6 @@ class InscriptionController extends Controller
     public function paymentNiubiz(Inscription $inscription)
     {
 
-        $specialcode = SpecialCode::where('code', $inscription->special_code)->first();
-
-        if($specialcode){
-            if($specialcode->payment_required == 'No'){
-                if($specialcode->amount == $inscription->total){
-                    return redirect()->route('inscriptions.index')->with('success', 'Inscripción realizada con éxito, no requiere pago.');
-                }else{
-
-                }
-            }
-        }
-
         if($inscription->total == 0){
             return redirect()->route('inscriptions.index')->with('success', 'Inscripción realizada con éxito, no requiere pago.');
         }
@@ -1216,15 +1264,9 @@ class InscriptionController extends Controller
         ->where('inscriptions.id', $inscription->id)
         ->first();
 
-        if($specialcode){
-            if($specialcode->payment_required == 'No'){
-                $amount = $datainscription->total - $specialcode->amount;
-            }else{
-                $amount = $datainscription->total;
-            }
-        }else{
-            $amount = $datainscription->total;
-        }
+        // El total ya contiene únicamente los importes efectivos de categoría,
+        // acompañante y cursos. No se deben volver a descontar códigos especiales.
+        $amount = $datainscription->total;
 
         $sessionToken = $this->generateSessionToken($amount);
 

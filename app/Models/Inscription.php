@@ -26,4 +26,11 @@ class Inscription extends Model
         'voucher_file',
         'status',
     ];
+
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class)
+            ->withPivot('unit_price')
+            ->withTimestamps();
+    }
 }

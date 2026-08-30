@@ -98,6 +98,12 @@
                 <td>US$ {{ $datainscription->price_accompanist }}</td>
             </tr>
             @endif
+            @foreach($datainscription->courses as $course)
+            <tr>
+                <td>Curso: {{ $course->name }}</td>
+                <td>US$ {{ number_format($course->pivot->unit_price, 2) }}</td>
+            </tr>
+            @endforeach
             <tr>
                 <td><b>Monto Total</b></td>
                 <td>US$ {{ $datainscription->total }}</td>

@@ -14,6 +14,8 @@
     .category-row:hover { background: #f8faff; }
     .category-row.is-selected { background: var(--inscription-soft); box-shadow: inset 4px 0 0 var(--inscription-primary); }
     .category-row.is-selected label { color: #263b98; font-weight: 700; }
+    .course-card { cursor: pointer; border: 1px solid #e5e9f2; transition: .2s; }
+    .course-card.is-selected { border-color: var(--inscription-primary); background: var(--inscription-soft); }
     .form-panel { border: 1px solid #e5e9f2; border-radius: 12px; padding: 1rem; background: #fff; }
     .form-error-summary { border-left: 4px solid #e7515a; }
     @media (max-width: 767.98px) {
@@ -239,11 +241,6 @@
                                                             </div>
                                                         </td>
                                                 </tr>
-                                                <tr class="table-secondary">
-                                                    <td><b>Monto Total</b></td>
-                                                    <td class="text-center"><b>US$ <span id="text_total">{{ $inscription->total }}</span></b></td>
-                                                    <input type="hidden" name="total" id="total" value="{{ $inscription->total }}">
-                                                </tr>
                                             </tbody>
                                         </table>
                                     </div>
@@ -321,6 +318,29 @@
 
                                 </div>
 
+                                @if($courses->isNotEmpty())
+                                    <div class="col-md-12">
+                                        <div class="form-panel">
+                                            <div class="fw-bold mb-1">{{ __('Cursos') }}</div>
+                                            <small class="text-muted d-block mb-3">Selecciona los cursos incluidos en esta inscripción.</small>
+                                            <div class="row g-3">
+                                                @foreach($courses as $course)
+                                                    @php
+                                                        $courseSelected = in_array($course->id, old('course_ids', $selectedCourseIds));
+                                                        $courseFull = !$courseSelected && $course->capacity && $course->inscriptions_count >= $course->capacity;
+                                                    @endphp
+                                                    <div class="col-md-6"><label class="card h-100 p-3 mb-0 course-card @if($courseSelected) is-selected @endif @if($courseFull) opacity-50 @endif" for="edit_course_{{ $course->id }}">
+                                                        <div class="d-flex gap-2"><input type="checkbox" class="form-check-input course-option mt-1" name="course_ids[]" id="edit_course_{{ $course->id }}" value="{{ $course->id }}" data-course-price="{{ $courseSelected ? $selectedCoursePrices[$course->id] : $course->price }}" @if($courseSelected) checked @endif @if($courseFull) disabled @endif>
+                                                            <div class="flex-grow-1"><div class="d-flex justify-content-between"><strong>{{ $course->name }}</strong><span class="text-primary fw-bold">US$ {{ number_format($course->price, 2) }}</span></div><small>{{ $course->course_date ? $course->course_date->format('d/m/Y') : 'Fecha por definir' }} @if($course->location) · {{ $course->location }}@endif</small>@if($courseFull)<small class="d-block text-danger">Cupos agotados</small>@endif</div>
+                                                        </div>
+                                                    </label></div>
+                                                @endforeach
+                                            </div>
+                                            <div class="text-end fw-bold mt-3">Subtotal cursos: US$ <span id="text_courses_total">0.00</span></div>
+                                        </div>
+                                    </div>
+                                @endif
+
                                 <div class="col-md-12" id="dv_invoice">
                                     <div class="card px-3 py-3">
                                         <label class="form-label fw-bold mb-1">{{ __('¿Necesita Factura?') }}</label>
@@ -351,6 +371,17 @@
                                             </div>
                                         </div>
 
+                                    </div>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <div class="card border-0 bg-dark text-white px-3 py-3">
+                                        <input type="hidden" name="total" id="total" value="{{ $inscription->total }}">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="fw-bold fs-5">{{ __('TOTAL A PAGAR') }}</span>
+                                            <span class="fw-bold fs-4">US$ <span id="text_total">{{ number_format($inscription->total, 2) }}</span></span>
+                                        </div>
+                                        <small class="text-white-50" id="totalConceptsText">Selecciona los conceptos de la inscripción.</small>
                                     </div>
                                 </div>
 
@@ -529,13 +560,30 @@ document.addEventListener("DOMContentLoaded", function() {
     function updateTotal() {
         const categoryValue = parseFloat(priceCategory.value) || 0;
         const accompanistValue = parseFloat(priceAccompanist.value) || 0;
-        const totalValue = categoryValue + accompanistValue;
+        let coursesValue = 0;
+        document.querySelectorAll('.course-option').forEach(option => {
+            option.closest('.course-card').classList.toggle('is-selected', option.checked);
+            if (option.checked) coursesValue += parseFloat(option.dataset.coursePrice) || 0;
+        });
+        const coursesTotal = document.getElementById('text_courses_total');
+        if (coursesTotal) coursesTotal.textContent = coursesValue.toFixed(2);
+        const totalValue = categoryValue + accompanistValue + coursesValue;
         total.value = totalValue;
-        textTotal.innerHTML = totalValue;
+        textTotal.innerHTML = totalValue.toFixed(2);
+
+        const concepts = [];
+        if (document.querySelector('.category-option:checked')) concepts.push('categoría');
+        if (accompanist && accompanist.checked) concepts.push('acompañante');
+        const selectedCoursesCount = document.querySelectorAll('.course-option:checked').length;
+        if (selectedCoursesCount === 1) concepts.push('1 curso');
+        if (selectedCoursesCount > 1) concepts.push(selectedCoursesCount + ' cursos');
+        const conceptsText = document.getElementById('totalConceptsText');
+        conceptsText.textContent = concepts.length ? 'Incluye: ' + concepts.join(', ') + '.' : 'Selecciona los conceptos de la inscripción.';
     }
 
     priceCategory.addEventListener('input', updateTotal);
     priceAccompanist.addEventListener('input', updateTotal);
+    document.querySelectorAll('.course-option').forEach(option => option.addEventListener('change', updateTotal));
 
     //if accompanist is checked
     if(accompanist){

@@ -206,6 +206,13 @@
                                                 </tr>
                                                 @endif
 
+                                                @foreach($purchasedCourses as $course)
+                                                <tr>
+                                                    <td>{{ __('Curso') }}: <b>{{ $course->name }}</b></td>
+                                                    <td><b>US$ {{ number_format($course->pivot->unit_price, 2) }}</b></td>
+                                                </tr>
+                                                @endforeach
+
                                             <tr class="table-secondary">
                                                 <td><b>Monto Total</b></td>
                                                 <td><b>US$ {{ $inscription->total }}</b></td>

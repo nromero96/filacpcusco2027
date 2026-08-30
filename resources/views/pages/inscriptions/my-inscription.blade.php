@@ -14,6 +14,9 @@
     .category-row:hover { background: #f8faff; }
     .category-row.is-selected { background: var(--inscription-soft); box-shadow: inset 4px 0 0 var(--inscription-primary); }
     .category-row.is-selected label { color: #263b98; font-weight: 700; }
+    .course-card { cursor: pointer; border: 1px solid #e5e9f2; transition: border-color .2s, background-color .2s, box-shadow .2s; }
+    .course-card:hover { border-color: #aab7f5; }
+    .course-card.is-selected { border-color: var(--inscription-primary); background: var(--inscription-soft); box-shadow: 0 0 0 2px rgba(67, 97, 238, .08); }
     .form-panel { border: 1px solid #e5e9f2; border-radius: 12px; padding: 1rem; background: #fff; }
     .form-error-summary { border-left: 4px solid #e7515a; }
     .field-valid { border-color: #00ab55 !important; background-color: #f4fff9 !important; }
@@ -294,10 +297,6 @@
                                                 @endif
 
                                             @endforeach
-                                            <tr class="table-secondary">
-                                                <td><b>TOTAL A PAGAR</b></td>
-                                                <td><b>US$ <span id="paymentotal">00</span></b></td>
-                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -361,6 +360,36 @@
 
                             </div>
 
+                            @if($courses->isNotEmpty())
+                                <div class="col-md-12">
+                                    <div class="form-panel">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <div><div class="fw-bold text-dark">{{ __('Cursos disponibles') }}</div><small class="text-muted">Puedes seleccionar uno o varios cursos para agregarlos a tu inscripción.</small></div>
+                                            <span class="badge badge-light-primary">Opcional</span>
+                                        </div>
+                                        <div class="row g-3">
+                                            @foreach($courses as $course)
+                                                @php $courseFull = $course->capacity && $course->inscriptions_count >= $course->capacity; @endphp
+                                                <div class="col-md-6">
+                                                    <label class="card h-100 p-3 mb-0 course-card @if(in_array($course->id, old('course_ids', []))) is-selected @endif @if($courseFull) opacity-50 @endif" for="course_{{ $course->id }}">
+                                                        <div class="d-flex gap-2">
+                                                            <input class="form-check-input course-option mt-1" type="checkbox" name="course_ids[]" id="course_{{ $course->id }}" value="{{ $course->id }}" data-course-price="{{ $course->price }}" @if(in_array($course->id, old('course_ids', []))) checked @endif @if($courseFull) disabled @endif>
+                                                            <div class="flex-grow-1">
+                                                                <div class="d-flex justify-content-between gap-2"><strong>{{ $course->name }}</strong><span class="text-primary fw-bold text-nowrap">US$ {{ number_format($course->price, 2) }}</span></div>
+                                                                @if($course->description)<small class="text-muted d-block mt-1">{{ $course->description }}</small>@endif
+                                                                <small class="d-block mt-2"><b>{{ $course->course_date ? $course->course_date->format('d/m/Y') : 'Fecha por definir' }}</b>@if($course->start_time) · {{ substr($course->start_time, 0, 5) }}@endif @if($course->location) · {{ $course->location }}@endif</small>
+                                                                @if($courseFull)<small class="text-danger fw-bold">Cupos agotados</small>@elseif($course->capacity)<small class="text-muted">{{ $course->capacity - $course->inscriptions_count }} cupos disponibles</small>@endif
+                                                            </div>
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                        <div class="text-end mt-3 fw-bold">Subtotal cursos: US$ <span id="text_courses_total">0.00</span></div>
+                                    </div>
+                                </div>
+                            @endif
+
                             <div class="col-md-12" id="dv_invoice">
                                 <div class="card px-3 py-3">
                                     <label for="" class="form-label fw-bold">
@@ -401,6 +430,16 @@
                                         </div>
                                     </div>
 
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <div class="card border-0 bg-dark text-white px-3 py-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="fw-bold fs-5">{{ __('TOTAL A PAGAR') }}</span>
+                                        <span class="fw-bold fs-4">US$ <span id="paymentotal">0.00</span></span>
+                                    </div>
+                                    <small class="text-white-50" id="totalConceptsText">Selecciona los conceptos de la inscripción.</small>
                                 </div>
                             </div>
 

@@ -120,6 +120,17 @@
             </li>
             @endcan
 
+            @if(Auth::user()->hasRole('Administrador'))
+            <li class="menu {{ ($category_name === 'courses') ? 'active' : '' }}">
+                <a href="{{ route('courses.index') }}" aria-expanded="false" class="dropdown-toggle">
+                    <div class="">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24"><path d="m3 7 9-4 9 4-9 4-9-4Z"></path><path d="M7 9v6c0 1 2.2 3 5 3s5-2 5-3V9"></path><path d="M21 7v6"></path></svg>
+                        <span>{{ __('Cursos') }}</span>
+                    </div>
+                </a>
+            </li>
+            @endif
+
             @can('gafetes.index')
             <li class="menu {{ ($category_name === 'gafetes') ? 'active' : '' }}">
                 <a href="{{route('gafetes.index')}}" aria-expanded="false" class="dropdown-toggle">
