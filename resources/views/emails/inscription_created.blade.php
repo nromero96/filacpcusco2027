@@ -104,6 +104,9 @@
                 <td>US$ {{ number_format($course->pivot->unit_price, 2) }}</td>
             </tr>
             @endforeach
+            @foreach($datainscription->tours as $tour)
+            <tr><td>Tour: {{ $tour->name }} @if($tour->pivot->has_accompanist) <br><small>Acompañante: {{ $tour->pivot->accompanist_name }}</small> @endif</td><td>US$ {{ number_format($tour->pivot->unit_price + $tour->pivot->accompanist_price, 2) }}</td></tr>
+            @endforeach
             <tr>
                 <td><b>Monto Total</b></td>
                 <td>US$ {{ $datainscription->total }}</td>

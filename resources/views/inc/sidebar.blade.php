@@ -129,6 +129,9 @@
                     </div>
                 </a>
             </li>
+            <li class="menu {{ ($category_name === 'tours') ? 'active' : '' }}">
+                <a href="{{ route('tours.index') }}" aria-expanded="false" class="dropdown-toggle"><div><svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 11 22 2l-9 19-2-8-8-2Z"></path><path d="m11 13 4-4"></path></svg><span>{{ __('Tours') }}</span></div></a>
+            </li>
             @endif
 
             @can('gafetes.index')

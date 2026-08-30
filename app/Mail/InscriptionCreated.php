@@ -25,7 +25,7 @@ class InscriptionCreated extends Mailable
     {
         $this->userinfo = $data['user'];
         $this->datainscription = $data['datainscription'];
-        $this->datainscription->load('courses');
+        $this->datainscription->load(['courses', 'tours']);
     }
 
     /**

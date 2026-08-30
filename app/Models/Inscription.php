@@ -33,4 +33,11 @@ class Inscription extends Model
             ->withPivot('unit_price')
             ->withTimestamps();
     }
+
+    public function tours()
+    {
+        return $this->belongsToMany(Tour::class)
+            ->withPivot(['unit_price', 'has_accompanist', 'accompanist_price', 'accompanist_name', 'accompanist_document_type', 'accompanist_document_number', 'accompanist_phone'])
+            ->withTimestamps();
+    }
 }

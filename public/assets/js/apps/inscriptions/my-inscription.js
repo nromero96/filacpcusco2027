@@ -116,6 +116,9 @@ const categoryRadioButtons = document.querySelectorAll('input[type="radio"][name
 const accompanistCheckboxes = document.querySelectorAll('input[type="checkbox"][name="accompanist"]');
 const courseCheckboxes = document.querySelectorAll('.course-option');
 const coursesTotalElement = document.getElementById('text_courses_total');
+const tourCheckboxes = document.querySelectorAll('.tour-option');
+const tourCompanionCheckboxes = document.querySelectorAll('.tour-companion-option');
+const toursTotalElement = document.getElementById('text_tours_total');
 const paymentotalElement = document.getElementById('paymentotal');
 
 // Función para calcular el precio total
@@ -186,12 +189,32 @@ function calculateTotalPrice() {
   totalPrice += coursesTotal;
   if (coursesTotalElement) coursesTotalElement.textContent = coursesTotal.toFixed(2);
 
+  let toursTotal = 0;
+  tourCheckboxes.forEach(option => {
+    const card = option.closest('[data-tour-card]');
+    card.classList.toggle('is-selected', option.checked);
+    const control = card.querySelector('.tour-companion-control');
+    control.classList.toggle('d-none', !option.checked);
+    if (option.checked) toursTotal += parseFloat(option.dataset.tourPrice) || 0;
+    const companion = card.querySelector('.tour-companion-option');
+    if (!option.checked) companion.checked = false;
+    const fields = card.querySelector('.tour-companion-fields');
+    fields.classList.toggle('d-none', !option.checked || !companion.checked);
+    fields.querySelectorAll('input,select').forEach(field => field.required = option.checked && companion.checked);
+    if (option.checked && companion.checked) toursTotal += parseFloat(companion.dataset.companionPrice) || 0;
+  });
+  totalPrice += toursTotal;
+  if (toursTotalElement) toursTotalElement.textContent = toursTotal.toFixed(2);
+
   const concepts = [];
   if (document.querySelector('input[name="category_inscription_id"]:checked')) concepts.push('categoría');
   if (document.querySelector('input[name="accompanist"]:checked')) concepts.push('acompañante');
   const selectedCoursesCount = document.querySelectorAll('.course-option:checked').length;
   if (selectedCoursesCount === 1) concepts.push('1 curso');
   if (selectedCoursesCount > 1) concepts.push(selectedCoursesCount + ' cursos');
+  const selectedToursCount = document.querySelectorAll('.tour-option:checked').length;
+  if (selectedToursCount === 1) concepts.push('1 tour');
+  if (selectedToursCount > 1) concepts.push(selectedToursCount + ' tours');
   const totalConceptsText = document.getElementById('totalConceptsText');
   if (totalConceptsText) {
     totalConceptsText.textContent = concepts.length
@@ -219,6 +242,8 @@ categoryRadioButtons.forEach(radio => {
 courseCheckboxes.forEach(checkbox => {
   checkbox.addEventListener('change', calculateTotalPrice);
 });
+tourCheckboxes.forEach(checkbox => checkbox.addEventListener('change', calculateTotalPrice));
+tourCompanionCheckboxes.forEach(checkbox => checkbox.addEventListener('change', calculateTotalPrice));
 
 document.querySelectorAll('.category-row').forEach(row => {
   row.addEventListener('click', event => {
@@ -270,11 +295,14 @@ function updateFreeSpecialCodePaymentForCourses() {
     && specialCodeVerify.value === 'valid' && parseFloat(selectedCategory.dataset.catprice || 0) === 0;
   if (!isValidatedFreeCode) return;
   const hasPaidCourses = Array.from(courseCheckboxes).some(option => option.checked && parseFloat(option.dataset.coursePrice || 0) > 0);
-  dv_payment.classList.toggle('d-none', !hasPaidCourses);
+  const hasPaidTours = Array.from(tourCheckboxes).some(option => option.checked && parseFloat(option.dataset.tourPrice || 0) > 0);
+  dv_payment.classList.toggle('d-none', !hasPaidCourses && !hasPaidTours);
   updateInvoiceAvailability();
 }
 
 courseCheckboxes.forEach(option => option.addEventListener('change', updateFreeSpecialCodePaymentForCourses));
+tourCheckboxes.forEach(option => option.addEventListener('change', updateFreeSpecialCodePaymentForCourses));
+tourCompanionCheckboxes.forEach(option => option.addEventListener('change', updateFreeSpecialCodePaymentForCourses));
 
 const inputVoucherFile = document.getElementById('voucher_file');
 
@@ -468,7 +496,8 @@ btnValidateSpecialCode.addEventListener('click', function(){
           inputDocumentFile.removeAttribute('required');
 
           const hasPaidCourses = Array.from(courseCheckboxes).some(option => option.checked && parseFloat(option.dataset.coursePrice || 0) > 0);
-          if (response.payment_required === 'Si' || hasPaidCourses) {
+          const hasPaidTours = Array.from(tourCheckboxes).some(option => option.checked && parseFloat(option.dataset.tourPrice || 0) > 0);
+          if (response.payment_required === 'Si' || hasPaidCourses || hasPaidTours) {
             dv_payment.classList.remove('d-none');
           } else {
             dv_invoice.classList.add('d-none');

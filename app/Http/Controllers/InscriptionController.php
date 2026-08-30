@@ -16,6 +16,7 @@ use App\Models\SpecialCode;
 use App\Models\BeneficiarioBeca;
 use App\Models\Country;
 use App\Models\Course;
+use App\Models\Tour;
 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Pagination\Paginator;
@@ -30,6 +31,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Validator;
 use App\Rules\PhoneNumber;
 use App\Rules\ValidRuc;
 
@@ -430,8 +432,9 @@ class InscriptionController extends Controller
             //notes status
             $statusnotes = StatusNote::where('inscription_id', $id)->orderBy('id', 'desc')->get();
             $purchasedCourses = Inscription::findOrFail($id)->courses()->get();
+            $purchasedTours = Inscription::findOrFail($id)->tours()->get();
 
-            return view('pages.inscriptions.show')->with($data)->with('inscription', $inscription)->with('accompanist', $accompanist)->with('paymentcard', $paymentcard)->with('statusnotes', $statusnotes)->with('purchasedCourses', $purchasedCourses);
+            return view('pages.inscriptions.show')->with($data)->with('inscription', $inscription)->with('accompanist', $accompanist)->with('paymentcard', $paymentcard)->with('statusnotes', $statusnotes)->with('purchasedCourses', $purchasedCourses)->with('purchasedTours',$purchasedTours);
         }else{
             return redirect()->route('inscriptions.index')->with('error', 'No tiene permisos para ver esta inscripción');
         }
@@ -497,6 +500,8 @@ class InscriptionController extends Controller
             $courses = Course::where('status', 'active')
                 ->orWhereHas('inscriptions', fn ($query) => $query->where('inscriptions.id', $id))
                 ->withCount('inscriptions')->orderBy('course_date')->orderBy('name')->get();
+            $tours = Tour::where('status', 'active')->orWhereHas('inscriptions', fn($q)=>$q->where('inscriptions.id',$id))->withCount('inscriptions')->orderBy('tour_date')->orderBy('name')->get();
+            $tours->each(fn($tour)=>$tour->sold_seats=$tour->inscriptions()->get()->sum(fn($i)=>1+(int)$i->pivot->has_accompanist));
 
             $paymentcard = Payment::where('inscription_id', $id)->first();
             $accompanist = Accompanist::find($inscription->accompanist_id);
@@ -504,8 +509,8 @@ class InscriptionController extends Controller
             //notes status
             $statusnotes = StatusNote::where('inscription_id', $id)->orderBy('id', 'desc')->get();
 
-            $selectedCourses = $inscription->courses()->get();
-            return view('pages.inscriptions.edit')->with($data)->with('inscription', $inscription)->with('accompanist', $accompanist)->with('paymentcard', $paymentcard)->with('statusnotes', $statusnotes)->with('category_inscriptions', $category_inscriptions)->with('countries', $countries)->with('courses', $courses)->with('selectedCourseIds', $selectedCourses->pluck('id')->all())->with('selectedCoursePrices', $selectedCourses->pluck('pivot.unit_price', 'id')->all());
+            $selectedCourses = $inscription->courses()->get(); $selectedTours=$inscription->tours()->get();
+            return view('pages.inscriptions.edit')->with($data)->with('inscription', $inscription)->with('accompanist', $accompanist)->with('paymentcard', $paymentcard)->with('statusnotes', $statusnotes)->with('category_inscriptions', $category_inscriptions)->with('countries', $countries)->with('courses', $courses)->with('selectedCourseIds', $selectedCourses->pluck('id')->all())->with('selectedCoursePrices', $selectedCourses->pluck('pivot.unit_price', 'id')->all())->with('tours',$tours)->with('selectedTours',$selectedTours->keyBy('id'));
 
         }else{
             return redirect()->route('inscriptions.index')->with('error', 'No tiene permisos para editar esta inscripción');
@@ -576,9 +581,14 @@ class InscriptionController extends Controller
                 'payment_method' => ['required', Rule::in(['Transferencia/Depósito', 'Tarjeta'])],
                 'course_ids' => 'nullable|array',
                 'course_ids.*' => ['integer', 'distinct', Rule::exists('courses', 'id')],
+                'tour_ids' => 'nullable|array',
+                'tour_ids.*' => ['integer', 'distinct', Rule::exists('tours', 'id')],
+                'tour_has_accompanist' => 'nullable|array',
+                'tour_companion' => 'nullable|array',
                 'document_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
                 'voucher_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
             ]);
+            $this->validateTourCompanions($request);
 
             DB::transaction(function () use ($request, $validated, $inscription, $user, $needsInvoice) {
                 $existingCoursePrices = $inscription->courses()->get()->pluck('pivot.unit_price', 'id');
@@ -589,6 +599,9 @@ class InscriptionController extends Controller
                         throw ValidationException::withMessages(['course_ids' => "El curso {$course->name} ya no tiene cupos disponibles."]);
                     }
                 }
+                $existingTours=$inscription->tours()->get()->keyBy('id');
+                $selectedTours=Tour::whereIn('id',$validated['tour_ids']??[])->lockForUpdate()->get();
+                foreach($selectedTours as $tour){ $seats=1+($request->boolean("tour_has_accompanist.{$tour->id}")?1:0); $sold=$tour->inscriptions()->where('inscriptions.id','!=',$inscription->id)->get()->sum(fn($i)=>1+(int)$i->pivot->has_accompanist); if($tour->capacity && $sold+$seats>$tour->capacity) throw ValidationException::withMessages(['tour_ids'=>"El tour {$tour->name} no tiene cupos suficientes."]); }
 
                 $user->fill(collect($validated)->only([
                     'name', 'lastname', 'second_lastname', 'document_type', 'document_number',
@@ -619,7 +632,10 @@ class InscriptionController extends Controller
                 ])->all();
                 $inscription->courses()->sync($coursePurchaseData);
                 $courseTotal = collect($coursePurchaseData)->sum('unit_price');
-                $inscription->total = $validated['price_category'] + $validated['price_accompanist'] + $courseTotal;
+                $tourData=$this->tourPurchaseData($request,$selectedTours,$existingTours);
+                $inscription->tours()->sync($tourData);
+                $tourTotal=collect($tourData)->sum(fn($row)=>$row['unit_price']+$row['accompanist_price']);
+                $inscription->total = $validated['price_category'] + $validated['price_accompanist'] + $courseTotal + $tourTotal;
                 $inscription->special_code = $validated['special_code'] ?? null;
                 $inscription->invoice = $validated['country'] === 'Perú' ? $validated['invoice'] : 'no';
                 $inscription->invoice_ruc = $needsInvoice() ? $validated['invoice_ruc'] : null;
@@ -689,6 +705,8 @@ class InscriptionController extends Controller
         $category_inscriptions = CategoryInscription::orderBy('order', 'asc')->get();
         $countries = Country::orderByRaw("CASE WHEN name = 'Perú' THEN 0 ELSE 1 END, name ASC")->get();
         $courses = Course::where('status', 'active')->withCount('inscriptions')->orderBy('course_date')->orderBy('name')->get();
+        $tours = Tour::where('status','active')->withCount('inscriptions')->orderBy('tour_date')->orderBy('name')->get();
+        $tours->each(fn($tour)=>$tour->sold_seats=$tour->inscriptions()->get()->sum(fn($i)=>1+(int)$i->pivot->has_accompanist));
 
         $user = User::find($id);
 
@@ -700,7 +718,7 @@ class InscriptionController extends Controller
             $data['beneficiariobeca'] = 'no';
         }
 
-        return view('pages.inscriptions.my-inscription')->with($data)->with('category_inscriptions', $category_inscriptions)->with('countries', $countries)->with('beneficiariobeca', $beneficiariobeca)->with('user', $user)->with('courses', $courses);
+        return view('pages.inscriptions.my-inscription')->with($data)->with('category_inscriptions', $category_inscriptions)->with('countries', $countries)->with('beneficiariobeca', $beneficiariobeca)->with('user', $user)->with('courses', $courses)->with('tours',$tours);
     }
 
     public function storeMyInscription(Request $request){
@@ -720,7 +738,7 @@ class InscriptionController extends Controller
         $needsDocument = fn () => $selectedCategory && $selectedCategory->requires_document;
         $needsVoucher = fn () => $request->payment_method === 'Transferencia/Depósito'
             && $selectedCategory
-            && ($selectedCategory->requires_voucher || count($request->input('course_ids', [])) > 0);
+            && ($selectedCategory->requires_voucher || count($request->input('course_ids', [])) > 0 || count($request->input('tour_ids', [])) > 0);
         $temporaryUploadExists = function ($attribute, $value, $fail) {
             if ($value === null || $value === '') {
                 return;
@@ -784,9 +802,14 @@ class InscriptionController extends Controller
             'payment_method' => ['required', Rule::in(['Transferencia/Depósito', 'Tarjeta'])],
             'course_ids' => 'nullable|array',
             'course_ids.*' => ['integer', 'distinct', Rule::exists('courses', 'id')->where(fn ($query) => $query->where('status', 'active'))],
+            'tour_ids' => 'nullable|array',
+            'tour_ids.*' => ['integer', 'distinct', Rule::exists('tours', 'id')->where(fn($query)=>$query->where('status','active'))],
+            'tour_has_accompanist' => 'nullable|array',
+            'tour_companion' => 'nullable|array',
             'document_file' => [Rule::requiredIf($needsDocument), 'nullable', 'string', $temporaryUploadExists],
             'voucher_file' => [Rule::requiredIf($needsVoucher), 'nullable', 'string', $temporaryUploadExists],
         ]);
+        $this->validateTourCompanions($request);
 
         DB::beginTransaction();
 
@@ -798,6 +821,8 @@ class InscriptionController extends Controller
                     return redirect()->back()->withErrors(['course_ids' => "El curso {$course->name} ya no tiene cupos disponibles."])->withInput();
                 }
             }
+            $selectedTours=Tour::whereIn('id',$validatedData['tour_ids']??[])->lockForUpdate()->get();
+            foreach($selectedTours as $tour){ $seats=1+($request->boolean("tour_has_accompanist.{$tour->id}")?1:0); $sold=$tour->inscriptions()->get()->sum(fn($i)=>1+(int)$i->pivot->has_accompanist); if($tour->capacity && $sold+$seats>$tour->capacity){ DB::rollBack(); return redirect()->back()->withErrors(['tour_ids'=>"El tour {$tour->name} no tiene cupos suficientes."])->withInput(); } }
 
             // Serializa los intentos del mismo usuario y evita dobles inscripciones.
             $user = User::whereKey($iduser)->lockForUpdate()->firstOrFail();
@@ -920,6 +945,9 @@ class InscriptionController extends Controller
             ])->all();
             $inscription->courses()->attach($coursePurchaseData);
             $inscription->total += $selectedCourses->sum('price');
+            $tourData=$this->tourPurchaseData($request,$selectedTours);
+            $inscription->tours()->attach($tourData);
+            $inscription->total += collect($tourData)->sum(fn($row)=>$row['unit_price']+$row['accompanist_price']);
             $inscription->save();
 
             // Manejo de documentos temporales
@@ -999,6 +1027,8 @@ class InscriptionController extends Controller
         $category_inscriptions = CategoryInscription::orderBy('order', 'asc')->get();
         $countries = Country::orderByRaw("CASE WHEN name = 'Perú' THEN 0 ELSE 1 END, name ASC")->get();
         $courses = Course::where('status', 'active')->withCount('inscriptions')->orderBy('course_date')->orderBy('name')->get();
+        $tours = Tour::where('status','active')->withCount('inscriptions')->orderBy('tour_date')->orderBy('name')->get();
+        $tours->each(fn($tour)=>$tour->sold_seats=$tour->inscriptions()->get()->sum(fn($i)=>1+(int)$i->pivot->has_accompanist));
 
         if (\Auth::user()->hasRole('Administrador')) {
             return view('pages.inscriptions.my-inscription')
@@ -1008,6 +1038,7 @@ class InscriptionController extends Controller
                 ->with('beneficiariobeca', null)
                 ->with('user', new User())
                 ->with('courses', $courses)
+                ->with('tours', $tours)
                 ->with('manualRegistration', true);
         }else{
             return redirect()->route('inscriptions.index')->with('error', 'No tiene permisos para ver esta vista');
@@ -1027,7 +1058,7 @@ class InscriptionController extends Controller
         $needsInvoice = fn () => $request->country === 'Perú' && $request->invoice === 'si';
         $needsDocument = fn () => $selectedCategory && $selectedCategory->requires_document;
         $needsVoucher = fn () => $request->payment_method === 'Transferencia/Depósito' && $selectedCategory
-            && ($selectedCategory->requires_voucher || count($request->input('course_ids', [])) > 0);
+            && ($selectedCategory->requires_voucher || count($request->input('course_ids', [])) > 0 || count($request->input('tour_ids', [])) > 0);
         $temporaryUploadExists = function ($attribute, $value, $fail) {
             if ($value === null || $value === '') return;
             if (!TemporaryFile::where('folder', trim($value, '[]"'))->exists()) {
@@ -1073,9 +1104,14 @@ class InscriptionController extends Controller
             'payment_method' => ['required', Rule::in(['Transferencia/Depósito', 'Tarjeta'])],
             'course_ids' => 'nullable|array',
             'course_ids.*' => ['integer', 'distinct', Rule::exists('courses', 'id')->where(fn ($query) => $query->where('status', 'active'))],
+            'tour_ids' => 'nullable|array',
+            'tour_ids.*' => ['integer', 'distinct', Rule::exists('tours', 'id')->where(fn($query)=>$query->where('status','active'))],
+            'tour_has_accompanist' => 'nullable|array',
+            'tour_companion' => 'nullable|array',
             'document_file' => [Rule::requiredIf($needsDocument), 'nullable', 'string', $temporaryUploadExists],
             'voucher_file' => [Rule::requiredIf($needsVoucher), 'nullable', 'string', $temporaryUploadExists],
         ]);
+        $this->validateTourCompanions($request);
 
         DB::beginTransaction();
 
@@ -1087,6 +1123,8 @@ class InscriptionController extends Controller
                     return redirect()->back()->withErrors(['course_ids' => "El curso {$course->name} ya no tiene cupos disponibles."])->withInput();
                 }
             }
+            $selectedTours=Tour::whereIn('id',$request->input('tour_ids',[]))->lockForUpdate()->get();
+            foreach($selectedTours as $tour){ $seats=1+($request->boolean("tour_has_accompanist.{$tour->id}")?1:0); $sold=$tour->inscriptions()->get()->sum(fn($i)=>1+(int)$i->pivot->has_accompanist); if($tour->capacity && $sold+$seats>$tour->capacity){ DB::rollBack(); return redirect()->back()->withErrors(['tour_ids'=>"El tour {$tour->name} no tiene cupos suficientes."])->withInput(); } }
 
             $specialAmount = null;
             if ($isSpecialCategory()) {
@@ -1178,6 +1216,9 @@ class InscriptionController extends Controller
                 $course->id => ['unit_price' => $course->price],
             ])->all());
             $inscription->total += $selectedCourses->sum('price');
+            $tourData=$this->tourPurchaseData($request,$selectedTours);
+            $inscription->tours()->attach($tourData);
+            $inscription->total += collect($tourData)->sum(fn($row)=>$row['unit_price']+$row['accompanist_price']);
             $inscription->save();
 
             // Manejo de documentos temporales
@@ -1456,6 +1497,37 @@ class InscriptionController extends Controller
         }
 
 
+    }
+
+    private function validateTourCompanions(Request $request): void
+    {
+        foreach ($request->input('tour_ids', []) as $tourId) {
+            if (!$request->boolean("tour_has_accompanist.{$tourId}")) continue;
+            Validator::make($request->input("tour_companion.{$tourId}", []), [
+                'name' => 'required|string|max:200',
+                'document_type' => ['required', Rule::in(['DNI', 'Carnet de extranjería', 'Pasaporte'])],
+                'document_number' => 'required|string|max:30',
+                'phone' => ['required', new PhoneNumber],
+            ], [], ['name'=>'nombre del acompañante','document_type'=>'tipo de documento','document_number'=>'número de documento','phone'=>'teléfono del acompañante'])->validate();
+        }
+    }
+
+    private function tourPurchaseData(Request $request, $tours, $existing = null): array
+    {
+        return $tours->mapWithKeys(function ($tour) use ($request, $existing) {
+            $old = $existing ? $existing->get($tour->id) : null;
+            $has = $request->boolean("tour_has_accompanist.{$tour->id}");
+            $person = $request->input("tour_companion.{$tour->id}", []);
+            return [$tour->id => [
+                'unit_price' => $old ? $old->pivot->unit_price : $tour->price,
+                'has_accompanist' => $has,
+                'accompanist_price' => $has ? ($old && $old->pivot->has_accompanist ? $old->pivot->accompanist_price : $tour->accompanist_price) : 0,
+                'accompanist_name' => $has ? ($person['name'] ?? null) : null,
+                'accompanist_document_type' => $has ? ($person['document_type'] ?? null) : null,
+                'accompanist_document_number' => $has ? ($person['document_number'] ?? null) : null,
+                'accompanist_phone' => $has ? ($person['phone'] ?? null) : null,
+            ]];
+        })->all();
     }
 
 }

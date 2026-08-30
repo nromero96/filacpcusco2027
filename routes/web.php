@@ -29,6 +29,7 @@ use App\Http\Controllers\GafeteController;
 use App\Http\Controllers\CertificadoController;
 use App\Http\Controllers\FileManagerController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\TourController;
 
 
 use Illuminate\Support\Facades\Artisan;
@@ -153,6 +154,8 @@ Route::group(['middleware' => ['auth', 'check.inscription','ensureStatusActive']
 
     Route::get('courses/{course}/buyers', [CourseController::class, 'buyers'])->name('courses.buyers');
     Route::resource('courses', CourseController::class)->except(['show', 'destroy'])->names('courses');
+    Route::get('tours/{tour}/buyers', [TourController::class, 'buyers'])->name('tours.buyers');
+    Route::resource('tours', TourController::class)->except(['show', 'destroy'])->names('tours');
 
     Route::get('payment-niubiz/{inscription}', [InscriptionController::class, 'paymentNiubiz'])->name('inscriptions.paymentniubiz');
     Route::post('confirm-payment-niubiz', [InscriptionController::class, 'confirmPaymentNiubiz'])->name('inscriptions.confirmpaymentniubiz');

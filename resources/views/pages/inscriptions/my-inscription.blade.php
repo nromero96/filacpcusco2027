@@ -17,6 +17,8 @@
     .course-card { cursor: pointer; border: 1px solid #e5e9f2; transition: border-color .2s, background-color .2s, box-shadow .2s; }
     .course-card:hover { border-color: #aab7f5; }
     .course-card.is-selected { border-color: var(--inscription-primary); background: var(--inscription-soft); box-shadow: 0 0 0 2px rgba(67, 97, 238, .08); }
+    .tour-card { border: 1px solid #e5e9f2; border-radius: 12px; padding: 1rem; }
+    .tour-card.is-selected { border-color: var(--inscription-primary); background: #fafbff; }
     .form-panel { border: 1px solid #e5e9f2; border-radius: 12px; padding: 1rem; background: #fff; }
     .form-error-summary { border-left: 4px solid #e7515a; }
     .field-valid { border-color: #00ab55 !important; background-color: #f4fff9 !important; }
@@ -377,7 +379,7 @@
                                                             <div class="flex-grow-1">
                                                                 <div class="d-flex justify-content-between gap-2"><strong>{{ $course->name }}</strong><span class="text-primary fw-bold text-nowrap">US$ {{ number_format($course->price, 2) }}</span></div>
                                                                 @if($course->description)<small class="text-muted d-block mt-1">{{ $course->description }}</small>@endif
-                                                                <small class="d-block mt-2"><b>{{ $course->course_date ? $course->course_date->format('d/m/Y') : 'Fecha por definir' }}</b>@if($course->start_time) · {{ substr($course->start_time, 0, 5) }}@endif @if($course->location) · {{ $course->location }}@endif</small>
+                                                                <small class="d-block mt-2"><b>{{ $course->course_date ? $course->course_date->format('d/m/Y') : 'Fecha por definir' }}</b> @if($course->start_time) · {{ substr($course->start_time, 0, 5) }} @endif @if($course->location) · {{ $course->location }} @endif</small>
                                                                 @if($courseFull)<small class="text-danger fw-bold">Cupos agotados</small>@elseif($course->capacity)<small class="text-muted">{{ $course->capacity - $course->inscriptions_count }} cupos disponibles</small>@endif
                                                             </div>
                                                         </div>
@@ -388,6 +390,29 @@
                                         <div class="text-end mt-3 fw-bold">Subtotal cursos: US$ <span id="text_courses_total">0.00</span></div>
                                     </div>
                                 </div>
+                            @endif
+
+                            @if($tours->isNotEmpty())
+                                <div class="col-md-12"><div class="form-panel">
+                                    <div class="fw-bold text-dark">{{ __('Tours disponibles') }}</div><small class="text-muted d-block mb-3">Selecciona uno o varios tours. Puedes agregar un acompañante en cada tour.</small>
+                                    <div class="row g-3">
+                                    @foreach($tours as $tour)
+                                        @php $tourFull=$tour->capacity && $tour->sold_seats >= $tour->capacity; $tourChecked=in_array($tour->id,old('tour_ids',[])); $tourCompanion=old("tour_has_accompanist.$tour->id")=='1'; @endphp
+                                        <div class="col-12"><div class="tour-card @if($tourChecked) is-selected @endif @if($tourFull) opacity-50 @endif" data-tour-card>
+                                            <div class="d-flex gap-2"><input type="checkbox" class="form-check-input tour-option mt-1" name="tour_ids[]" id="tour_{{$tour->id}}" value="{{$tour->id}}" data-tour-price="{{$tour->price}}" @if($tourChecked) checked @endif @if($tourFull) disabled @endif><label for="tour_{{$tour->id}}" class="flex-grow-1 cursor-pointer"><div class="d-flex justify-content-between"><b>{{$tour->name}}</b><b class="text-primary">US$ {{number_format($tour->price,2)}}</b></div><small>{{$tour->tour_date?$tour->tour_date->format('d/m/Y'):'Fecha por definir'}} @if($tour->meeting_point) · {{$tour->meeting_point}} @endif</small></label></div>
+                                            <div class="tour-companion-control mt-3 @if(!$tourChecked) d-none @endif">
+                                                <div class="form-check"><input type="hidden" name="tour_has_accompanist[{{$tour->id}}]" value="0"><input type="checkbox" class="form-check-input tour-companion-option" name="tour_has_accompanist[{{$tour->id}}]" id="tour_companion_{{$tour->id}}" value="1" data-companion-price="{{$tour->accompanist_price}}" @if($tourCompanion) checked @endif><label class="form-check-label" for="tour_companion_{{$tour->id}}">Agregar acompañante al tour (+ US$ {{number_format($tour->accompanist_price,2)}})</label></div>
+                                                <div class="tour-companion-fields row g-2 mt-1 @if(!$tourCompanion) d-none @endif">
+                                                    <div class="col-md-4"><label class="form-label mb-0">Nombre completo *</label><input class="form-control" name="tour_companion[{{$tour->id}}][name]" value="{{old("tour_companion.$tour->id.name")}}"></div>
+                                                    <div class="col-md-2"><label class="form-label mb-0">Tipo documento *</label><select class="form-select" name="tour_companion[{{$tour->id}}][document_type]"><option value="">Seleccione</option>@foreach(['DNI','Carnet de extranjería','Pasaporte'] as $type)<option value="{{$type}}" @if(old("tour_companion.$tour->id.document_type")===$type) selected @endif>{{$type}}</option>@endforeach</select></div>
+                                                    <div class="col-md-3"><label class="form-label mb-0">N° documento *</label><input class="form-control" name="tour_companion[{{$tour->id}}][document_number]" value="{{old("tour_companion.$tour->id.document_number")}}"></div>
+                                                    <div class="col-md-3"><label class="form-label mb-0">Teléfono *</label><input class="form-control" inputmode="tel" name="tour_companion[{{$tour->id}}][phone]" value="{{old("tour_companion.$tour->id.phone")}}"></div>
+                                                </div>
+                                            </div>
+                                        </div></div>
+                                    @endforeach
+                                    </div><div class="text-end fw-bold mt-3">Subtotal tours: US$ <span id="text_tours_total">0.00</span></div>
+                                </div></div>
                             @endif
 
                             <div class="col-md-12" id="dv_invoice">

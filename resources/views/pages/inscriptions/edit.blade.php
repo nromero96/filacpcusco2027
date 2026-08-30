@@ -331,7 +331,7 @@
                                                     @endphp
                                                     <div class="col-md-6"><label class="card h-100 p-3 mb-0 course-card @if($courseSelected) is-selected @endif @if($courseFull) opacity-50 @endif" for="edit_course_{{ $course->id }}">
                                                         <div class="d-flex gap-2"><input type="checkbox" class="form-check-input course-option mt-1" name="course_ids[]" id="edit_course_{{ $course->id }}" value="{{ $course->id }}" data-course-price="{{ $courseSelected ? $selectedCoursePrices[$course->id] : $course->price }}" @if($courseSelected) checked @endif @if($courseFull) disabled @endif>
-                                                            <div class="flex-grow-1"><div class="d-flex justify-content-between"><strong>{{ $course->name }}</strong><span class="text-primary fw-bold">US$ {{ number_format($course->price, 2) }}</span></div><small>{{ $course->course_date ? $course->course_date->format('d/m/Y') : 'Fecha por definir' }} @if($course->location) · {{ $course->location }}@endif</small>@if($courseFull)<small class="d-block text-danger">Cupos agotados</small>@endif</div>
+                                                            <div class="flex-grow-1"><div class="d-flex justify-content-between"><strong>{{ $course->name }}</strong><span class="text-primary fw-bold">US$ {{ number_format($course->price, 2) }}</span></div><small>{{ $course->course_date ? $course->course_date->format('d/m/Y') : 'Fecha por definir' }} @if($course->location) · {{ $course->location }} @endif</small> @if($courseFull)<small class="d-block text-danger">Cupos agotados</small> @endif</div>
                                                         </div>
                                                     </label></div>
                                                 @endforeach
@@ -339,6 +339,17 @@
                                             <div class="text-end fw-bold mt-3">Subtotal cursos: US$ <span id="text_courses_total">0.00</span></div>
                                         </div>
                                     </div>
+                                @endif
+
+                                @if($tours->isNotEmpty())
+                                <div class="col-md-12"><div class="form-panel"><div class="fw-bold">Tours</div><small class="text-muted d-block mb-3">Selecciona los tours y registra el acompañante correspondiente.</small><div class="row g-3">
+                                @foreach($tours as $tour)
+                                    @php $selectedTour=$selectedTours->get($tour->id); $tourChecked=in_array($tour->id,old('tour_ids',$selectedTours->keys()->all())); $hasTourCompanion=old("tour_has_accompanist.$tour->id",$selectedTour&&$selectedTour->pivot->has_accompanist?'1':'0')=='1'; $full=!$tourChecked&&$tour->capacity&&$tour->sold_seats >= $tour->capacity; @endphp
+                                    <div class="col-12"><div class="tour-card card p-3 @if($tourChecked) border-primary @endif @if($full) opacity-50 @endif" data-tour-card><div class="d-flex gap-2"><input type="checkbox" class="form-check-input tour-option" name="tour_ids[]" id="edit_tour_{{$tour->id}}" value="{{$tour->id}}" data-tour-price="{{$selectedTour?$selectedTour->pivot->unit_price:$tour->price}}" @if($tourChecked) checked @endif @if($full) disabled @endif><label class="flex-grow-1" for="edit_tour_{{$tour->id}}"><span class="d-flex justify-content-between"><b>{{$tour->name}}</b><b>US$ {{number_format($tour->price,2)}}</b></span></label></div>
+                                    <div class="tour-companion-control mt-2 @if(!$tourChecked) d-none @endif"><input type="hidden" name="tour_has_accompanist[{{$tour->id}}]" value="0"><div class="form-check"><input type="checkbox" class="form-check-input tour-companion-option" name="tour_has_accompanist[{{$tour->id}}]" id="edit_tour_companion_{{$tour->id}}" value="1" data-companion-price="{{$selectedTour&&$selectedTour->pivot->has_accompanist?$selectedTour->pivot->accompanist_price:$tour->accompanist_price}}" @if($hasTourCompanion) checked @endif><label class="form-check-label" for="edit_tour_companion_{{$tour->id}}">Agregar acompañante (+ US$ {{number_format($tour->accompanist_price,2)}})</label></div>
+                                    <div class="tour-companion-fields row g-2 mt-1 @if(!$hasTourCompanion) d-none @endif"><div class="col-md-4"><input class="form-control" placeholder="Nombre completo" name="tour_companion[{{$tour->id}}][name]" value="{{old("tour_companion.$tour->id.name",$selectedTour?$selectedTour->pivot->accompanist_name:'')}}"></div><div class="col-md-2"><select class="form-select" name="tour_companion[{{$tour->id}}][document_type]"><option value="">Tipo documento</option>@foreach(['DNI','Carnet de extranjería','Pasaporte'] as $type)<option value="{{$type}}" @if(old("tour_companion.$tour->id.document_type",$selectedTour?$selectedTour->pivot->accompanist_document_type:'')===$type) selected @endif>{{$type}}</option>@endforeach</select></div><div class="col-md-3"><input class="form-control" placeholder="N° documento" name="tour_companion[{{$tour->id}}][document_number]" value="{{old("tour_companion.$tour->id.document_number",$selectedTour?$selectedTour->pivot->accompanist_document_number:'')}}"></div><div class="col-md-3"><input class="form-control" placeholder="Teléfono" name="tour_companion[{{$tour->id}}][phone]" value="{{old("tour_companion.$tour->id.phone",$selectedTour?$selectedTour->pivot->accompanist_phone:'')}}"></div></div></div></div></div>
+                                @endforeach
+                                </div><div class="text-end fw-bold mt-3">Subtotal tours: US$ <span id="text_tours_total">0.00</span></div></div></div>
                                 @endif
 
                                 <div class="col-md-12" id="dv_invoice">
@@ -567,7 +578,10 @@ document.addEventListener("DOMContentLoaded", function() {
         });
         const coursesTotal = document.getElementById('text_courses_total');
         if (coursesTotal) coursesTotal.textContent = coursesValue.toFixed(2);
-        const totalValue = categoryValue + accompanistValue + coursesValue;
+        let toursValue = 0;
+        document.querySelectorAll('.tour-option').forEach(option => { const card=option.closest('[data-tour-card]'); const companion=card.querySelector('.tour-companion-option'); card.classList.toggle('border-primary',option.checked); card.querySelector('.tour-companion-control').classList.toggle('d-none',!option.checked); if(!option.checked) companion.checked=false; const fields=card.querySelector('.tour-companion-fields'); fields.classList.toggle('d-none',!option.checked||!companion.checked); fields.querySelectorAll('input,select').forEach(field=>field.required=option.checked&&companion.checked); if(option.checked){ toursValue+=parseFloat(option.dataset.tourPrice)||0; if(companion.checked)toursValue+=parseFloat(companion.dataset.companionPrice)||0; } });
+        const toursTotal=document.getElementById('text_tours_total'); if(toursTotal)toursTotal.textContent=toursValue.toFixed(2);
+        const totalValue = categoryValue + accompanistValue + coursesValue + toursValue;
         total.value = totalValue;
         textTotal.innerHTML = totalValue.toFixed(2);
 
@@ -577,6 +591,9 @@ document.addEventListener("DOMContentLoaded", function() {
         const selectedCoursesCount = document.querySelectorAll('.course-option:checked').length;
         if (selectedCoursesCount === 1) concepts.push('1 curso');
         if (selectedCoursesCount > 1) concepts.push(selectedCoursesCount + ' cursos');
+        const selectedToursCount=document.querySelectorAll('.tour-option:checked').length;
+        if(selectedToursCount===1) concepts.push('1 tour');
+        if(selectedToursCount>1) concepts.push(selectedToursCount+' tours');
         const conceptsText = document.getElementById('totalConceptsText');
         conceptsText.textContent = concepts.length ? 'Incluye: ' + concepts.join(', ') + '.' : 'Selecciona los conceptos de la inscripción.';
     }
@@ -584,6 +601,7 @@ document.addEventListener("DOMContentLoaded", function() {
     priceCategory.addEventListener('input', updateTotal);
     priceAccompanist.addEventListener('input', updateTotal);
     document.querySelectorAll('.course-option').forEach(option => option.addEventListener('change', updateTotal));
+    document.querySelectorAll('.tour-option,.tour-companion-option').forEach(option => option.addEventListener('change', updateTotal));
 
     //if accompanist is checked
     if(accompanist){
