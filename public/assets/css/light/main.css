@@ -1251,7 +1251,7 @@ select.form-control.form-custom {
   color: #fff !important;
   background-color: #882c31 !important;
   border-color: #882c31;
-  box-shadow: 0 10px 20px -10px rgba(0, 147, 45, 0.62);
+  box-shadow: 0 10px 20px -10px rgba(136, 44, 49, 0.61);
 }
 .btn-primary:hover, .btn-primary:focus {
   color: #fff !important;
