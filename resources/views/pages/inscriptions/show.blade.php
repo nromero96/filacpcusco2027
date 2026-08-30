@@ -219,17 +219,21 @@
                                     <label class="form-label mt-3">
                                         <span class="fw-bold">{{ __('Complete los datos del acompañante') }}:</span></label>
                                     <div class="row">
-                                        <div class="col-md-4">
+                                        <div class="col-md-3">
                                             <label class="text-muted mb-0">{{__("Nombre completo")}}:</label><br>
                                             <span class="bx-text">{{ $inscription->accompanist_name }}</span>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <label class="text-muted mb-0">{{__("Tipo documento")}}:</label><br>
                                             <span class="bx-text">{{ $inscription->accompanist_typedocument }}</span>
                                         </div>
                                         <div class="col-md-2">
                                             <label class="text-muted mb-0">{{__("N° documento")}}:</label><br>
                                             <span class="bx-text">{{ $inscription->accompanist_numdocument }}</span>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="text-muted mb-0">{{__("Teléfono")}}:</label><br>
+                                            <span class="bx-text">{{ $inscription->accompanist_phone }}</span>
                                         </div>
                                         <div class="col-md-3">
                                             <label class="text-muted mb-0">{{__("Solapín/Gafete")}}:</label><br>

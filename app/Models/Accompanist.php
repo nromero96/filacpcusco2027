@@ -13,6 +13,7 @@ class Accompanist extends Model
         'accompanist_name',
         'accompanist_typedocument',
         'accompanist_numdocument',
+        'accompanist_phone',
         'accompanist_solapin',
     ];
 }

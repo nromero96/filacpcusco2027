@@ -213,12 +213,12 @@
                                         <label class="form-label mt-0">
                                             <span class="fw-bold">{{ __('Complete los datos del acompañante') }}:</span></label>
                                         <div class="row">
-                                            <div class="col-md-4">
+                                            <div class="col-md-3">
                                                 <label class="text-muted mb-0">{{__("Nombre completo")}}:</label><br>
                                                 <input type="hidden" name="accompanist_id" id="accompanist_id" value="{{ $inscription->accompanist_id }}">
                                                 <input type="text" name="accompanist_name" class="form-control" id="accompanist_name" value="{{ $inscription->accompanist_name }}" placeholder="Nombre y apellidos">
                                             </div>
-                                            <div class="col-md-3">
+                                            <div class="col-md-2">
                                                 <label class="text-muted mb-0">{{__("Tipo documento")}}:</label><br>
                                                 <select class="form-select" name="accompanist_typedocument" id="accompanist_typedocument">
                                                     <option value="">Seleccione</option>
@@ -231,6 +231,10 @@
                                             <div class="col-md-2">
                                                 <label class="text-muted mb-0">{{__("N° documento")}}:</label><br>
                                                 <input type="text" name="accompanist_numdocument" class="form-control" id="accompanist_numdocument" value="{{ $inscription->accompanist_numdocument }}" placeholder="N° documento">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="text-muted mb-0">{{__("Teléfono")}}:</label><br>
+                                                <input type="text" inputmode="tel" name="accompanist_phone" class="form-control" id="accompanist_phone" value="{{ $inscription->accompanist_phone }}" placeholder="+51 987654321">
                                             </div>
                                             <div class="col-md-3">
                                                 <label class="text-muted mb-0">{{__("Solapín/Gafete")}}:</label><br>
@@ -432,6 +436,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const accompanistName = document.getElementById('accompanist_name');
     const accompanistTypeDocument = document.getElementById('accompanist_typedocument');
     const accompanistNumDocument = document.getElementById('accompanist_numdocument');
+    const accompanistPhone = document.getElementById('accompanist_phone');
     const accompanistSolapin = document.getElementById('accompanist_solapin');
     const dvSpecialCode = document.getElementById('dv_special_code');
     const specialCode = document.getElementById('special_code');
@@ -471,6 +476,7 @@ document.addEventListener("DOMContentLoaded", function() {
             accompanistName.setAttribute('required', 'required');
             accompanistTypeDocument.setAttribute('required', 'required');
             accompanistNumDocument.setAttribute('required', 'required');
+            accompanistPhone.setAttribute('required', 'required');
             accompanistSolapin.setAttribute('required', 'required');
         } else {
             dvAccompanist.classList.add('d-none');
@@ -478,6 +484,7 @@ document.addEventListener("DOMContentLoaded", function() {
             accompanistName.removeAttribute('required');
             accompanistTypeDocument.removeAttribute('required');
             accompanistNumDocument.removeAttribute('required');
+            accompanistPhone.removeAttribute('required');
             accompanistSolapin.removeAttribute('required');
         }
     });

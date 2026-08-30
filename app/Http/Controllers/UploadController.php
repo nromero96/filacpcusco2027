@@ -11,6 +11,15 @@ use Illuminate\Support\Facades\Log;
 class UploadController extends Controller
 {
     public function store(Request $request){
+        if (($request->hasFile('document_file') || $request->hasFile('voucher_file')) && !auth()->check()) {
+            abort(403, 'Debe iniciar sesión para cargar documentos de inscripción.');
+        }
+
+        $request->validate([
+            'document_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'voucher_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+        ]);
+
         $uploadedFolders = []; // Utilizamos un arreglo para almacenar las carpetas de archivos subidos
 
         // Campos de archivo único
@@ -38,14 +47,15 @@ class UploadController extends Controller
 
 
     private function processFile($file) {
-        $originalFilename = $file->getClientOriginalName();
+        $originalFilename = basename($file->getClientOriginalName());
         $extension = $file->getClientOriginalExtension();
 
         // Genera un identificador único
         $uniqueIdentifier = uniqid();
 
         // Obtiene el nombre del archivo sin la extensión
-        $filenameWithoutExtension = pathinfo($originalFilename, PATHINFO_FILENAME);
+        $filenameWithoutExtension = preg_replace('/[^\pL\pN_-]+/u', '-', pathinfo($originalFilename, PATHINFO_FILENAME));
+        $filenameWithoutExtension = trim($filenameWithoutExtension, '-') ?: 'archivo';
 
         // Construye el nombre del archivo con el nombre y el identificador único
         $filename = $filenameWithoutExtension . '-' . $uniqueIdentifier . '.' . $extension;

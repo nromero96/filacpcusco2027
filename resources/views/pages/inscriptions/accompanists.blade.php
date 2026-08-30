@@ -86,6 +86,7 @@
                                             <th scope="col">{{__("Nombre")}}</th>
                                             <th scope="col">{{__("Tipo Doc.")}}</th>
                                             <th scope="col">{{__("N° Doc.")}}</th>
+                                            <th scope="col">{{__("Teléfono")}}</th>
                                             <th scope="col">{{__("Solapín/Gafete")}}</th>
                                             <th scope="col">{{__("Categoría")}}</th>
                                             <th scope="col">{{__("Precio")}}</th>
@@ -95,7 +96,7 @@
                                     <tbody>
                                         @if ($accompanists->isEmpty())
                                             <tr>
-                                                <td colspan="7" class="text-center">
+                                                <td colspan="10" class="text-center">
                                                     <h6 class="mt-2">{{__("No hay acompañantes registradas")}}</h6>
                                                 </td>
                                             </tr>
@@ -116,6 +117,9 @@
                                                     </td>
                                                     <td>
                                                         {{$accomp->accompanist_numdocument	}}
+                                                    </td>
+                                                    <td>
+                                                        {{$accomp->accompanist_phone}}
                                                     </td>
                                                     <td>
                                                         {{$accomp->accompanist_solapin	}}
