@@ -320,6 +320,29 @@ const inputInvoice = document.querySelectorAll('input[type="radio"][name="invoic
 const inputInvoiceRuc = document.getElementById('invoice_ruc');
 const inputInvoiceSocialReason = document.getElementById('invoice_social_reason');
 const inputInvoiceAddress = document.getElementById('invoice_address');
+const inputCountry = document.getElementById('inputCountry');
+const invoiceNo = document.getElementById('invoice_no');
+
+function updateInvoiceAvailability() {
+    const selectedCategory = document.querySelector('input[type="radio"][name="category_inscription_id"]:checked');
+    const isValidatedFreeSpecialCode = selectedCategory
+        && selectedCategory.dataset.usesSpecialCode === '1'
+        && specialCodeVerify.value === 'valid'
+        && dv_payment.classList.contains('d-none');
+    const canRequestInvoice = inputCountry.value === 'Perú' && !isValidatedFreeSpecialCode;
+
+    dv_invoice.classList.toggle('d-none', !canRequestInvoice);
+
+    if (!canRequestInvoice) {
+        invoiceNo.checked = true;
+        inputInvoiceRuc.value = '';
+        inputInvoiceSocialReason.value = '';
+        inputInvoiceAddress.value = '';
+        handleInvoice();
+    }
+}
+
+inputCountry.addEventListener('change', updateInvoiceAvailability);
 
 inputInvoiceRuc.addEventListener('input', function () {
     this.value = this.value.replace(/\D/g, '').slice(0, 11);
@@ -405,12 +428,12 @@ btnValidateSpecialCode.addEventListener('click', function(){
           inputDocumentFile.removeAttribute('required');
 
           if (response.payment_required === 'Si') {
-            dv_invoice.classList.remove('d-none');
             dv_payment.classList.remove('d-none');
           } else {
             dv_invoice.classList.add('d-none');
             dv_payment.classList.add('d-none');
           }
+          updateInvoiceAvailability();
 
 
         } else {
@@ -459,6 +482,7 @@ btnClearSpecialCode.addEventListener('click', function(){
     dvDocumentFile.classList.remove('d-none');
     dv_invoice.classList.remove('d-none');
     dv_payment.classList.remove('d-none');
+    updateInvoiceAvailability();
 
     calculateTotalPrice();
 });
@@ -492,6 +516,7 @@ if (selectedCategory) {
 }
 handleInvoice();
 handlePaymentMethod();
+updateInvoiceAvailability();
 
 
 const locale_es = {

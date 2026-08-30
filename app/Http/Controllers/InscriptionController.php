@@ -655,7 +655,7 @@ class InscriptionController extends Controller
 
         $isSpecialCategory = fn () => $selectedCategory && $selectedCategory->uses_special_code;
         $hasAccompanist = fn () => $request->accompanist === 'si';
-        $needsInvoice = fn () => $request->invoice === 'si';
+        $needsInvoice = fn () => $request->country === 'Perú' && $request->invoice === 'si';
         $needsDocument = fn () => $selectedCategory && $selectedCategory->requires_document;
         $needsVoucher = fn () => $request->payment_method === 'Transferencia/Depósito'
             && $selectedCategory
@@ -708,7 +708,15 @@ class InscriptionController extends Controller
             'accompanist_numdocument' => [Rule::requiredIf($hasAccompanist), 'nullable', 'string', 'max:30'],
             'accompanist_phone' => [Rule::requiredIf($hasAccompanist), 'nullable', new PhoneNumber],
             'accompanist_solapin' => [Rule::requiredIf($hasAccompanist), 'nullable', 'string', 'max:100'],
-            'invoice' => ['required', Rule::in(['no', 'si'])],
+            'invoice' => [
+                'required',
+                Rule::in(['no', 'si']),
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->country !== 'Perú' && $value === 'si') {
+                        $fail('La factura solo está disponible para inscripciones de Perú.');
+                    }
+                },
+            ],
             'invoice_ruc' => [Rule::requiredIf($needsInvoice), 'nullable', new ValidRuc],
             'invoice_social_reason' => [Rule::requiredIf($needsInvoice), 'nullable', 'string', 'max:255'],
             'invoice_address' => [Rule::requiredIf($needsInvoice), 'nullable', 'string', 'max:255'],
@@ -828,10 +836,10 @@ class InscriptionController extends Controller
             $inscription->total = $inscription->price_category + $inscription->price_accompanist;
             
             $inscription->special_code = $request->specialcode;
-            $inscription->invoice = $request->invoice;
-            $inscription->invoice_ruc = $request->invoice_ruc;
-            $inscription->invoice_social_reason = $request->invoice_social_reason;
-            $inscription->invoice_address = $request->invoice_address;
+            $inscription->invoice = $request->country === 'Perú' ? $request->invoice : 'no';
+            $inscription->invoice_ruc = $needsInvoice() ? $request->invoice_ruc : null;
+            $inscription->invoice_social_reason = $needsInvoice() ? $request->invoice_social_reason : null;
+            $inscription->invoice_address = $needsInvoice() ? $request->invoice_address : null;
             $inscription->payment_method = $request->payment_method;
 
             $inscription->save();
