@@ -349,21 +349,6 @@ class InscriptionController extends Controller
 
             $inscription->save();
 
-            //send email
-            $user = User::find($iduser);
-            $datainscription = Inscription::join('category_inscriptions', 'inscriptions.category_inscription_id', '=', 'category_inscriptions.id')
-            ->select('inscriptions.*', 'category_inscriptions.name as category_inscription_name')
-            ->where('inscriptions.id', $inscription->id)
-            ->first();
-            $data = [
-                'user' => $user,
-                'datainscription' => $datainscription,
-            ];
-
-            Mail::to($user->email)
-                ->cc(config('services.correonotificacion.inscripcion'))
-                ->send(new \App\Mail\InscriptionCreated($data));
-
             //redirect to payment page with inscription id
             //return redirect()->route('inscriptions.paymentniubiz', ['inscription' => $inscription->id]);
             return redirect()->route('inscriptions.show', ['inscription' => $inscription->id])->with('success', 'Inscripción realizada con éxito, validaremos tu pago en breve');
@@ -985,25 +970,28 @@ class InscriptionController extends Controller
             // los bloqueos transaccionales cuanto antes.
             DB::commit();
 
-            try {
-                Mail::to($user->email)
-                    ->cc(config('services.correonotificacion.inscripcion'))
-                    ->send(new \App\Mail\InscriptionCreated([
-                        'user' => $user,
-                        'datainscription' => $datainscription,
-                    ]));
-            } catch (\Exception $mailException) {
-                Log::warning('Inscripción registrada, pero no se pudo enviar el correo de confirmación.', [
-                    'inscription_id' => $inscription->id,
-                    'error' => $mailException->getMessage(),
-                ]);
+            if ($request->payment_method === 'Transferencia/Depósito') {
+                try {
+                    Mail::to($user->email)
+                        ->cc(config('services.correonotificacion.inscripcion'))
+                        ->send(new \App\Mail\InscriptionCreated([
+                            'user' => $user,
+                            'datainscription' => $datainscription,
+                        ]));
+                } catch (\Exception $mailException) {
+                    Log::warning('Inscripción registrada, pero no se pudo enviar el correo de preconfirmación.', [
+                        'inscription_id' => $inscription->id,
+                        'error' => $mailException->getMessage(),
+                    ]);
+                }
             }
 
             if ($request->payment_method === 'Transferencia/Depósito') {
                 return redirect()->route('inscriptions.index')->with('success', 'Inscripción realizada con éxito, validaremos tu información en breve');
             }
 
-            return redirect()->route('inscriptions.show', ['inscription' => $inscription->id])->with('success', 'Inscripción realizada con éxito, validaremos tu información en breve');
+            return redirect()->route('inscriptions.paymentniubiz', ['inscription' => $inscription->id])
+                ->with('success', 'Inscripción registrada. Completa el pago con tarjeta para confirmar tu participación.');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -1258,18 +1246,20 @@ class InscriptionController extends Controller
 
             DB::commit();
 
-            try {
-                Mail::to($user->email)
-                    ->cc(config('services.correonotificacion.inscripcion'))
-                    ->send(new \App\Mail\InscriptionCreated([
-                        'user' => $user,
-                        'datainscription' => $datainscription,
-                    ]));
-            } catch (\Exception $mailException) {
-                Log::warning('Inscripción manual registrada, pero no se pudo enviar el correo.', [
-                    'inscription_id' => $inscription->id,
-                    'error' => $mailException->getMessage(),
-                ]);
+            if ($request->payment_method === 'Transferencia/Depósito') {
+                try {
+                    Mail::to($user->email)
+                        ->cc(config('services.correonotificacion.inscripcion'))
+                        ->send(new \App\Mail\InscriptionCreated([
+                            'user' => $user,
+                            'datainscription' => $datainscription,
+                        ]));
+                } catch (\Exception $mailException) {
+                    Log::warning('Inscripción manual registrada, pero no se pudo enviar el correo de preconfirmación.', [
+                        'inscription_id' => $inscription->id,
+                        'error' => $mailException->getMessage(),
+                    ]);
+                }
             }
 
             return redirect()->route('inscriptions.index')->with('success', 'Inscripción realizada con éxito');
@@ -1284,13 +1274,22 @@ class InscriptionController extends Controller
 
     public function paymentNiubiz(Inscription $inscription)
     {
+        abort_unless((int) $inscription->user_id === (int) auth()->id(), 403);
 
-        if($inscription->total == 0){
-            return redirect()->route('inscriptions.index')->with('success', 'Inscripción realizada con éxito, no requiere pago.');
+        if ((float) $inscription->total <= 0) {
+            return redirect()->route('inscriptions.index')->with('success', 'La inscripción no requiere pago.');
         }
 
-        //get logged user id
-        $iduser = \Auth::user()->id;
+        if ($inscription->payment_method !== 'Tarjeta') {
+            return redirect()->route('inscriptions.show', $inscription)
+                ->with('error', 'Esta inscripción no fue registrada para pago con tarjeta.');
+        }
+
+        if ($inscription->status !== 'Pendiente' || Payment::where('inscription_id', $inscription->id)->exists()) {
+            return redirect()->route('inscriptions.show', $inscription)
+                ->with('success', 'El pago de esta inscripción ya fue procesado.');
+        }
+
         $data = [
             'category_name' => 'inscriptions',
             'page_name' => 'inscriptions_paymentniubiz',
@@ -1298,104 +1297,253 @@ class InscriptionController extends Controller
             'scrollspy_offset' => '',
         ];
 
-        $user = User::find($iduser);
+        $user = auth()->user();
         //data inscription inner join category_inscriptions
         $datainscription = Inscription::join('category_inscriptions', 'inscriptions.category_inscription_id', '=', 'category_inscriptions.id')
         ->select('inscriptions.*', 'category_inscriptions.name as category_inscription_name')
         ->where('inscriptions.id', $inscription->id)
         ->first();
 
-        // El total ya contiene únicamente los importes efectivos de categoría,
-        // acompañante y cursos. No se deben volver a descontar códigos especiales.
-        $amount = $datainscription->total;
+        $amount = number_format((float) $datainscription->total, 2, '.', '');
+        $purchaseNumber = $this->generatePurchaseNumber();
 
-        $sessionToken = $this->generateSessionToken($amount);
+        try {
+            $sessionToken = $this->generateSessionToken($amount, $user);
+        } catch (\Throwable $exception) {
+            Log::error('No se pudo iniciar una sesión de pago con Niubiz.', [
+                'inscription_id' => $inscription->id,
+                'error' => $exception->getMessage(),
+            ]);
 
-        return view('pages.inscriptions.paymentniubiz')->with($data)->with('user', $user)->with('datainscription', $datainscription)->with('sessionToken', $sessionToken)->with('amount', $amount);
+            $isUnauthorized = $exception instanceof \Illuminate\Http\Client\RequestException
+                && $exception->response
+                && $exception->response->status() === 401;
+
+            return redirect()->route('inscriptions.show', $inscription)
+                ->with('error', $isUnauthorized
+                    ? 'Niubiz rechazó las credenciales del comercio. Comunícate con soporte para habilitar el pago con tarjeta.'
+                    : 'No pudimos conectar con la pasarela de pago. Inténtalo nuevamente en unos minutos.');
+        }
+
+        session()->put("niubiz.orders.{$inscription->id}", [
+            'purchase_number' => $purchaseNumber,
+            'amount' => $amount,
+            'created_at' => now()->timestamp,
+        ]);
+
+        return view('pages.inscriptions.paymentniubiz', array_merge(
+            $data,
+            compact('user', 'datainscription', 'sessionToken', 'amount', 'purchaseNumber')
+        ));
     }
 
-    private function generateSessionToken($amount){
+    private function generateSessionToken(string $amount, User $user): string
+    {
+        $this->ensureNiubizConfigured();
         $auth = base64_encode(config('services.niubiz.user').':'.config('services.niubiz.password'));
-        $accessToken = Http::withHeaders([
+        $accessToken = Http::timeout(config('services.niubiz.timeout', 20))
+            ->retry(2, 300)
+            ->withHeaders([
                 'Authorization' => 'Basic '.$auth,
-            ])->get(config('services.niubiz.url_api').'/api.security/v1/security')
+                'Content-Type' => 'text/plain',
+                'Accept' => '*/*',
+            ])->get($this->niubizApiUrl('/api.security/v1/security'))
+            ->throw()
             ->body();
 
-        $accessToken = Http::withHeaders([
+        $countryIso = optional(Country::where('name', $user->country)->first())->iso ?: 'PE';
+        $phone = preg_replace('/\D+/', '', ($user->phone_code ?? '').($user->phone_code_city ?? '').($user->phone_number ?? ''));
+
+        $response = Http::timeout(config('services.niubiz.timeout', 20))
+            ->retry(2, 300)
+            ->withHeaders([
             'Authorization' => $accessToken,
             'Content-Type' => 'application/json',
-        ])->post(config('services.niubiz.url_api').'/api.ecommerce/v2/ecommerce/token/session/'.config('services.niubiz.merchant_id'),[
+        ])->post($this->niubizApiUrl('/api.ecommerce/v2/ecommerce/token/session/'.config('services.niubiz.merchant_id')), [
             'channel' => 'web',
-            'amount' => $amount,
+            'amount' => (float) $amount,
             'antifraud' => [
                 'clientIp' => request()->ip(),
                 'merchantDefineData' => [
-                    'MDD4' => auth()->user()->email,
-                    'MDD21' => 0,
-                    'MDD32' => auth()->user()->id,
+                    'MDD4' => $user->email,
+                    'MDD32' => (string) $user->id,
                     'MDD75' => 'Registrado',
-                    'MDD77' => now()->diffInDays(auth()->user()->created_at) + 1,
+                    'MDD77' => now()->diffInDays($user->created_at) + 1,
                 ],
             ],
-        ])->json();
+            'dataMap' => [
+                'cardholderCity' => (string) $user->city,
+                'cardholderCountry' => strtoupper((string) $countryIso),
+                'cardholderAddress' => (string) $user->address,
+                'cardholderPostalCode' => (string) $user->postal_code,
+                'cardholderState' => (string) $user->state,
+                'cardholderPhoneNumber' => substr($phone, 0, 15),
+            ],
+        ])->throw()->json();
 
-        return $accessToken['sessionKey'];
+        if (empty($response['sessionKey'])) {
+            throw new \RuntimeException('Niubiz no devolvió el token de sesión.');
+        }
+
+        return $response['sessionKey'];
+    }
+
+    private function generatePurchaseNumber(): string
+    {
+        do {
+            $purchaseNumber = (string) random_int(100000000000, 999999999999);
+        } while (Payment::where('purchasenumber', $purchaseNumber)->exists());
+
+        return $purchaseNumber;
+    }
+
+    private function ensureNiubizConfigured(): void
+    {
+        foreach (['merchant_id', 'user', 'password', 'currency', 'url_api', 'url_js', 'service_url', 'service_city', 'service_region', 'service_country', 'service_postal_code'] as $key) {
+            if (blank(config("services.niubiz.{$key}"))) {
+                throw new \RuntimeException("Falta configurar NIUBIZ_{$key}.");
+            }
+        }
+    }
+
+    private function niubizApiUrl(string $path): string
+    {
+        return rtrim(config('services.niubiz.url_api'), '/').'/'.ltrim($path, '/');
 
     }
 
-    public function confirmPaymentNiubiz(Request $request){
+    public function confirmPaymentNiubiz(Request $request, Inscription $inscription)
+    {
+        abort_unless((int) $inscription->user_id === (int) auth()->id(), 403);
+
+        $validated = $request->validate([
+            'transactionToken' => ['required', 'string', 'max:100'],
+        ]);
+        $order = session()->get("niubiz.orders.{$inscription->id}");
+
+        if (!$order || now()->timestamp - ($order['created_at'] ?? 0) > 1200) {
+            return redirect()->route('inscriptions.paymentniubiz', $inscription)
+                ->with('error', 'La sesión de pago venció. Abre nuevamente el formulario de Niubiz.');
+        }
+
+        if ($inscription->payment_method !== 'Tarjeta' || $inscription->status !== 'Pendiente') {
+            return redirect()->route('inscriptions.show', $inscription)
+                ->with('error', 'La inscripción no se encuentra disponible para pago.');
+        }
+
+        if (Payment::where('inscription_id', $inscription->id)->exists()) {
+            return redirect()->route('inscriptions.show', $inscription)
+                ->with('success', 'El pago ya había sido procesado.');
+        }
 
         $auth = base64_encode(config('services.niubiz.user').':'.config('services.niubiz.password'));
-        $accessToken = Http::withHeaders([
+        try {
+            $this->ensureNiubizConfigured();
+            $accessToken = Http::timeout(config('services.niubiz.timeout', 20))->retry(2, 300)->withHeaders([
                 'Authorization' => 'Basic '.$auth,
-            ])->get(config('services.niubiz.url_api').'/api.security/v1/security')
-            ->body();
+                'Content-Type' => 'text/plain',
+                'Accept' => '*/*',
+            ])->get($this->niubizApiUrl('/api.security/v1/security'))->throw()->body();
 
-        $response = Http::withHeaders([
-            'Content-Type' => 'application/json',
-            'Authorization' => $accessToken,
-        ])->post(config('services.niubiz.url_api').'/api.authorization/v3/authorization/ecommerce/'.config('services.niubiz.merchant_id'),[
-            'channel' => 'web',
-            'captureType' => 'manual',
-            'countable' => true,
-            'order' => [
-                'tokenId' => $request->transactionToken,
-                'purchaseNumber' => $request->purchasenumber,
-                'amount' => $request->amount,
-                'currency' => config('services.niubiz.currency'),
-            ],
-        ])->json();
+            // La autorización financiera no se reintenta automáticamente: ante un
+            // timeout el resultado puede ser incierto y repetirla podría duplicar el cobro.
+            $httpResponse = Http::timeout(config('services.niubiz.timeout', 20))->withHeaders([
+                'Content-Type' => 'application/json',
+                'Authorization' => $accessToken,
+            ])->post($this->niubizApiUrl('/api.authorization/v3/authorization/ecommerce/'.config('services.niubiz.merchant_id')), [
+                'channel' => 'web',
+                'captureType' => 'manual',
+                'countable' => true,
+                'order' => [
+                    'tokenId' => $validated['transactionToken'],
+                    'purchaseNumber' => (int) $order['purchase_number'],
+                    'amount' => (float) $order['amount'],
+                    'currency' => config('services.niubiz.currency'),
+                ],
+                'dataMap' => [
+                    'urlAddress' => config('services.niubiz.service_url'),
+                    'serviceLocationCityName' => config('services.niubiz.service_city'),
+                    'serviceLocationCountrySubdivisionCode' => config('services.niubiz.service_region'),
+                    'serviceLocationCountryCode' => config('services.niubiz.service_country'),
+                    'serviceLocationPostalCode' => config('services.niubiz.service_postal_code'),
+                ],
+            ]);
+            $response = $httpResponse->json() ?: [];
+        } catch (\Throwable $exception) {
+            Log::error('Error al autorizar el pago con Niubiz.', [
+                'inscription_id' => $inscription->id,
+                'purchase_number' => $order['purchase_number'],
+                'error' => $exception->getMessage(),
+            ]);
 
-        session()->flash('niubiz', [
-            'inscription' => $request->inscription,
-            'response' => $response,
-            'purchaseNumber' => $request->purchasenumber,
-        ]);
-
-
-        if(isset($response['dataMap']) && $response['dataMap']['ACTION_CODE'] === '000'){
-            //update status inscription
-            $inscription = Inscription::find($request->inscription);
-            $inscription->status = 'Procesando';
-            $inscription->updated_at = now();
-            $inscription->save();
-
-            //insert payment
-            $payment = new Payment();
-            $payment->inscription_id = $request->inscription;
-            $payment->user_id = \Auth::user()->id;
-            $payment->action_description = $response['dataMap']['ACTION_DESCRIPTION'];
-            $payment->purchasenumber = $request->purchasenumber;
-            $payment->card_brand = $response['dataMap']['BRAND'];
-            $payment->card_number = $response['dataMap']['CARD'];
-            $payment->amount = $response['order']['amount'];
-            $payment->currency = $response['order']['currency'];
-            $payment->transaction_date = $response['dataMap']['TRANSACTION_DATE'];
-            $payment->save();
-
-        }else{
-
+            return redirect()->route('inscriptions.show', $inscription)
+                ->with('error', 'No pudimos confirmar el resultado del pago. Antes de intentarlo nuevamente, verifica el movimiento de tu tarjeta o comunícate con soporte.');
         }
+
+        $approved = data_get($response, 'dataMap.ACTION_CODE') === '000'
+            && data_get($response, 'dataMap.STATUS') === 'Authorized';
+        $description = data_get($response, 'dataMap.ACTION_DESCRIPTION')
+            ?: data_get($response, 'data.ACTION_DESCRIPTION')
+            ?: data_get($response, 'errorMessage')
+            ?: 'La operación no pudo completarse.';
+
+        if ($approved) {
+            $paymentCreated = false;
+            DB::transaction(function () use ($inscription, $response, $order, &$paymentCreated) {
+                $lockedInscription = Inscription::whereKey($inscription->id)->lockForUpdate()->firstOrFail();
+                if (Payment::where('inscription_id', $lockedInscription->id)->exists()) {
+                    return;
+                }
+
+                Payment::create([
+                    'inscription_id' => $lockedInscription->id,
+                    'user_id' => auth()->id(),
+                    'action_description' => data_get($response, 'dataMap.ACTION_DESCRIPTION'),
+                    'purchasenumber' => $order['purchase_number'],
+                    'card_brand' => data_get($response, 'dataMap.BRAND'),
+                    'card_number' => data_get($response, 'dataMap.CARD'),
+                    'amount' => data_get($response, 'order.amount', $order['amount']),
+                    'currency' => data_get($response, 'order.currency', config('services.niubiz.currency')),
+                    'transaction_date' => data_get($response, 'dataMap.TRANSACTION_DATE'),
+                ]);
+
+                $lockedInscription->update(['status' => 'Procesando']);
+                $paymentCreated = true;
+            });
+            session()->forget("niubiz.orders.{$inscription->id}");
+
+            if ($paymentCreated) {
+                try {
+                    $paidInscription = Inscription::join('category_inscriptions', 'inscriptions.category_inscription_id', '=', 'category_inscriptions.id')
+                        ->select('inscriptions.*', 'category_inscriptions.name as category_inscription_name')
+                        ->where('inscriptions.id', $inscription->id)
+                        ->firstOrFail();
+                    Mail::to(auth()->user()->email)
+                        ->cc(config('services.correonotificacion.inscripcion'))
+                        ->send(new \App\Mail\InscriptionCreated([
+                            'user' => auth()->user(),
+                            'datainscription' => $paidInscription,
+                        ]));
+                } catch (\Throwable $mailException) {
+                    Log::warning('Pago Niubiz aprobado, pero no se pudo enviar el correo de preconfirmación.', [
+                        'inscription_id' => $inscription->id,
+                        'error' => $mailException->getMessage(),
+                    ]);
+                }
+            }
+        }
+
+        session()->flash('niubiz_result', [
+            'approved' => $approved,
+            'inscription_id' => $inscription->id,
+            'description' => $description,
+            'purchase_number' => $order['purchase_number'],
+            'transaction_date' => data_get($response, 'dataMap.TRANSACTION_DATE') ?: data_get($response, 'data.TRANSACTION_DATE'),
+            'card' => data_get($response, 'dataMap.CARD') ?: data_get($response, 'data.CARD'),
+            'brand' => data_get($response, 'dataMap.BRAND') ?: data_get($response, 'data.BRAND'),
+            'amount' => data_get($response, 'order.amount', $order['amount']),
+            'currency' => data_get($response, 'order.currency', config('services.niubiz.currency')),
+        ]);
 
         $data = [
             'category_name' => 'inscriptions',

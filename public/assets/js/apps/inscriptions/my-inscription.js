@@ -578,8 +578,7 @@ function handlePaymentMethod(){
     }else{
         dvTranfer.classList.add('d-none');
         dvCard.classList.remove('d-none');
-        //disable btnSubInscription
-        btnSubInscription.disabled = true;
+        btnSubInscription.disabled = false;
     }
 }
 

@@ -157,8 +157,10 @@ Route::group(['middleware' => ['auth', 'check.inscription','ensureStatusActive']
     Route::get('tours/{tour}/buyers', [TourController::class, 'buyers'])->name('tours.buyers');
     Route::resource('tours', TourController::class)->except(['show', 'destroy'])->names('tours');
 
-    Route::get('payment-niubiz/{inscription}', [InscriptionController::class, 'paymentNiubiz'])->name('inscriptions.paymentniubiz');
-    Route::post('confirm-payment-niubiz', [InscriptionController::class, 'confirmPaymentNiubiz'])->name('inscriptions.confirmpaymentniubiz');
+    Route::get('payment-niubiz/{inscription}', [InscriptionController::class, 'paymentNiubiz'])
+        ->middleware('throttle:10,1')->name('inscriptions.paymentniubiz');
+    Route::post('confirm-payment-niubiz/{inscription}', [InscriptionController::class, 'confirmPaymentNiubiz'])
+        ->middleware('throttle:10,1')->name('inscriptions.confirmpaymentniubiz');
 
     //HotelReservations
     Route::resource('hotelreservations', HotelReservationController::class)->names('hotelreservations');

@@ -25,6 +25,7 @@ class InscriptionConfirmation extends Mailable
     {
         $this->userinfo = $data['user'];
         $this->datainscription = $data['datainscription'];
+        $this->datainscription->load(['courses', 'tours', 'payment']);
     }
 
     /**

@@ -40,4 +40,9 @@ class Inscription extends Model
             ->withPivot(['unit_price', 'has_accompanist', 'accompanist_price', 'accompanist_name', 'accompanist_document_type', 'accompanist_document_number', 'accompanist_phone'])
             ->withTimestamps();
     }
+
+    public function payment()
+    {
+        return $this->hasOne(Payment::class);
+    }
 }

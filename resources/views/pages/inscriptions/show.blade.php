@@ -315,6 +315,12 @@
                                         {{ $inscription->payment_method }}
                                     </div>
 
+                                    @if($inscription->payment_method === 'Tarjeta' && $inscription->status === 'Pendiente' && $paymentcard === null && (int) $inscription->user_id === (int) auth()->id())
+                                        <a href="{{ route('inscriptions.paymentniubiz', $inscription->id) }}" class="btn btn-primary btn-sm mt-2">
+                                            Pagar ahora con Niubiz
+                                        </a>
+                                    @endif
+
                                     @if($inscription->voucher_file != null || $inscription->voucher_file != '')
                                         <div class="row mt-1">
                                             <div class="col-md-12">

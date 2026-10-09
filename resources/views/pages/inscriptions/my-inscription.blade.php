@@ -529,7 +529,7 @@
 
                                     <div class="row g-3">
                                         <div class="col-md-6"><label class="payment-choice" for="payment_method_transfer"><input class="form-check-input" type="radio" name="payment_method" value="Transferencia/Depósito" id="payment_method_transfer" @if(old('payment_method','Transferencia/Depósito')==='Transferencia/Depósito') checked @endif><span class="payment-choice-icon"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 10h18"></path><path d="M5 10v8"></path><path d="M9 10v8"></path><path d="M15 10v8"></path><path d="M19 10v8"></path><path d="M3 18h18"></path><path d="m12 3 9 4H3l9-4Z"></path></svg></span><strong>Transferencia o depósito</strong><span class="badge badge-light-success">Disponible</span></label></div>
-                                        <div class="col-md-6"><label class="payment-choice" for="payment_method_card"><input class="form-check-input" type="radio" name="payment_method" value="Tarjeta" id="payment_method_card" @if(old('payment_method')==='Tarjeta') checked @endif><span class="payment-choice-icon"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"></rect><path d="M2 10h20"></path><path d="M6 15h2"></path></svg></span><strong>Tarjeta</strong><span class="badge badge-light-info">Próximamente</span></label></div>
+                                        <div class="col-md-6"><label class="payment-choice" for="payment_method_card"><input class="form-check-input" type="radio" name="payment_method" value="Tarjeta" id="payment_method_card" @if(old('payment_method')==='Tarjeta') checked @endif><span class="payment-choice-icon"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"></rect><path d="M2 10h20"></path><path d="M6 15h2"></path></svg></span><strong>Tarjeta</strong><span class="badge badge-light-success">Disponible</span></label></div>
                                     </div>
 
                                     <div id="dv_tranfer" class="mt-3">
@@ -555,12 +555,10 @@
                                         </div>
                                     </div>
 
-                                    <div id="dv_card" class="pt-4 pb-4">
-                                        <p class="text-center">
-                                            <div class="alert alert-info alert-dismissible fade show text-center" role="alert">
-                                                Próximamente, podrás pagar tu inscripción con tarjeta de crédito/débito.
-                                            </div>
-                                        </p>
+                                    <div id="dv_card" class="pt-3 pb-1">
+                                        <div class="alert alert-light-primary mb-0" role="status">
+                                            {{ !empty($manualRegistration) ? 'El participante podrá completar el pago con Niubiz al ingresar a su cuenta.' : 'Al registrar tu inscripción continuarás al pago seguro de Niubiz.' }}
+                                        </div>
                                     </div>
 
                                 </div>

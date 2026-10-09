@@ -108,6 +108,18 @@
             <tr><td>Tour: {{ $tour->name }} @if($tour->pivot->has_accompanist) <br><small>Acompañante: {{ $tour->pivot->accompanist_name }}</small> @endif</td><td>US$ {{ number_format($tour->pivot->unit_price + $tour->pivot->accompanist_price, 2) }}</td></tr>
             @endforeach
             <tr>
+                <td>Método de pago</td>
+                <td>
+                    {{ $datainscription->payment_method }}
+                    @if($datainscription->payment_method === 'Tarjeta' && $datainscription->payment)
+                        @php($cardDigits = preg_replace('/\D/', '', $datainscription->payment->card_number ?? ''))
+                        @if($cardDigits !== '')
+                            <br><small>{{ $datainscription->payment->card_brand }} terminada en {{ substr($cardDigits, -4) }}</small>
+                        @endif
+                    @endif
+                </td>
+            </tr>
+            <tr>
                 <td><b>Monto Total</b></td>
                 <td>US$ {{ $datainscription->total }}</td>
             </tr>

@@ -45,6 +45,12 @@ return [
         'currency' => env('NIUBIZ_CURRENCY'),
         'url_api' => env('NIUBIZ_URL_API'),
         'url_js' => env('NIUBIZ_URL_JS'),
+        'timeout' => env('NIUBIZ_TIMEOUT', 20),
+        'service_url' => env('NIUBIZ_SERVICE_URL', env('APP_URL')),
+        'service_city' => env('NIUBIZ_SERVICE_CITY'),
+        'service_region' => env('NIUBIZ_SERVICE_REGION'),
+        'service_country' => env('NIUBIZ_SERVICE_COUNTRY'),
+        'service_postal_code' => env('NIUBIZ_SERVICE_POSTAL_CODE'),
     ],
 
 ];
