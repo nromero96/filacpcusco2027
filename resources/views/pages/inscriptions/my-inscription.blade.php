@@ -122,7 +122,7 @@
                                 <span class="badge badge-light-primary px-3 py-2">Formulario seguro</span>
                             </div>
                         </div>
-                        <form class="row g-3" action="{{ !empty($manualRegistration) ? route('inscriptions.storemanualregistrationparticipant') : route('inscriptions.storemyinscription') }}" method="POST" id="formInscription" enctype="multipart/form-data" novalidate>
+                        <form class="row g-3" action="{{ !empty($manualRegistration) ? route('inscriptions.storemanualregistrationparticipant') : route('inscriptions.storemyinscription') }}" method="POST" id="formInscription" enctype="multipart/form-data" data-manual-registration="{{ !empty($manualRegistration) ? '1' : '0' }}" novalidate>
                             @csrf
                             <div class="col-12 @if(!$errors->any()) d-none @endif" id="formErrorSummary" tabindex="-1" aria-live="assertive">
                                 <div class="alert alert-danger form-error-summary mb-0">
@@ -139,8 +139,8 @@
                                 {!!$errors->first("name", "<span class='text-danger'>:message</span>")!!}
                             </div>
                             <div class="col-md-4">
-                                <label for="lastname" class="form-label text-muted mb-0">{{__("Apellido paterno")}} <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control convert_mayus" name="lastname" id="lastname" value="{{ old('lastname', $user->lastname) }}" required>
+                                <label for="lastname" class="form-label text-muted mb-0">{{__("Apellido paterno")}} @if(empty($manualRegistration)) <span class="text-danger">*</span> @endif</label>
+                                <input type="text" class="form-control convert_mayus" name="lastname" id="lastname" value="{{ old('lastname', $user->lastname) }}" @if(empty($manualRegistration)) required @endif>
                                 {!!$errors->first("lastname", "<span class='text-danger'>:message</span>")!!}
                             </div>
                             <div class="col-md-4">
@@ -150,8 +150,8 @@
                             </div>
 
                             <div class="col-md-4">
-                                <label for="inputDocumentType" class="form-label text-muted mb-0">{{__("Tipo de documento")}} <span class="text-danger">*</span></label>
-                                <select name="document_type" class="form-select" id="inputDocumentType" required>
+                                <label for="inputDocumentType" class="form-label text-muted mb-0">{{__("Tipo de documento")}} @if(empty($manualRegistration)) <span class="text-danger">*</span> @endif</label>
+                                <select name="document_type" class="form-select" id="inputDocumentType" @if(empty($manualRegistration)) required @endif>
                                     <option value="">Seleccione...</option>
                                     <option value="DNI" @if(old('document_type', $user->document_type) === 'DNI') selected @endif>DNI</option>
                                     <option value="Carnet de extranjería" @if(old('document_type', $user->document_type) === 'Carnet de extranjería') selected @endif>Carnet de extranjería</option>
@@ -161,14 +161,14 @@
                             </div>
 
                             <div class="col-md-4">
-                                <label for="inputDocumentNumber" class="form-label text-muted mb-0">{{__("Número de documento")}} <span class="text-danger">*</span></label>
-                                <input type="text" name="document_number" class="form-control" id="inputDocumentNumber" value="{{ old('document_number', $user->document_number) }}" required>
+                                <label for="inputDocumentNumber" class="form-label text-muted mb-0">{{__("Número de documento")}} @if(empty($manualRegistration)) <span class="text-danger">*</span> @endif</label>
+                                <input type="text" name="document_number" class="form-control" id="inputDocumentNumber" value="{{ old('document_number', $user->document_number) }}" @if(empty($manualRegistration)) required @endif>
                                 {!!$errors->first("document_number", "<span class='text-danger'>:message</span>")!!}
                             </div>
 
                             <div class="col-md-4">
-                                <label for="inputCountry" class="form-label text-muted mb-0">{{__("País")}} <span class="text-danger">*</span></label>
-                                <select name="country" class="form-select" id="inputCountry" required>
+                                <label for="inputCountry" class="form-label text-muted mb-0">{{__("País")}} @if(empty($manualRegistration)) <span class="text-danger">*</span> @endif</label>
+                                <select name="country" class="form-select" id="inputCountry" @if(empty($manualRegistration)) required @endif>
                                     <option value="">Seleccione...</option>
                                     @foreach ($countries as $country)
                                         <option value="{{$country->name}}" @if(old('country', $user->country) === $country->name) selected @endif>{{$country->name}}</option>
@@ -177,40 +177,40 @@
                                 {!!$errors->first("country", "<span class='text-danger'>:message</span>")!!}
                             </div>
                             <div class="col-md-4">
-                                <label for="inputState" class="form-label text-muted mb-0">{{__("Estado/Provincia")}} <span class="text-danger">*</span></label>
-                                <input type="text" name="state" class="form-control" id="inputState" value="{{old('state')}}" required>
+                                <label for="inputState" class="form-label text-muted mb-0">{{__("Estado/Provincia")}} @if(empty($manualRegistration)) <span class="text-danger">*</span> @endif</label>
+                                <input type="text" name="state" class="form-control" id="inputState" value="{{old('state')}}" @if(empty($manualRegistration)) required @endif>
                                 {!!$errors->first("state", "<span class='text-danger'>:message</span>")!!}
                             </div>
                             <div class="col-md-4">
-                                <label for="inputCity" class="form-label text-muted mb-0">{{__("Distrito/Ciudad")}} <span class="text-danger">*</span></label>
-                                <input type="text" name="city" class="form-control" id="inputCity" value="{{old('city')}}" required>
+                                <label for="inputCity" class="form-label text-muted mb-0">{{__("Distrito/Ciudad")}} @if(empty($manualRegistration)) <span class="text-danger">*</span> @endif</label>
+                                <input type="text" name="city" class="form-control" id="inputCity" value="{{old('city')}}" @if(empty($manualRegistration)) required @endif>
                                 {!!$errors->first("city", "<span class='text-danger'>:message</span>")!!}
                             </div>
                             <div class="col-md-8">
-                                <label for="inputAddress" class="form-label text-muted mb-0">{{__("Dirección")}} <span class="text-danger">*</span></label>
-                                <input type="text" name="address" class="form-control" id="inputAddress" value="{{old('address')}}" required>
+                                <label for="inputAddress" class="form-label text-muted mb-0">{{__("Dirección")}} @if(empty($manualRegistration)) <span class="text-danger">*</span> @endif</label>
+                                <input type="text" name="address" class="form-control" id="inputAddress" value="{{old('address')}}" @if(empty($manualRegistration)) required @endif>
                                 {!!$errors->first("address", "<span class='text-danger'>:message</span>")!!}
                             </div>
 
                             <div class="col-md-4">
-                                <label for="inputPostalCode" class="form-label text-muted mb-0">{{__("Código Postal")}} <span class="text-danger">*</span></label>
-                                <input type="number" name="postal_code" class="form-control" id="inputPostalCode" value="{{old('postal_code')}}" required>
+                                <label for="inputPostalCode" class="form-label text-muted mb-0">{{__("Código Postal")}} @if(empty($manualRegistration)) <span class="text-danger">*</span> @endif</label>
+                                <input type="number" name="postal_code" class="form-control" id="inputPostalCode" value="{{old('postal_code')}}" @if(empty($manualRegistration)) required @endif>
                                 {!!$errors->first("postal_code", "<span class='text-danger'>:message</span>")!!}
                             </div>
 
                             <div class="col-md-4">
-                                <label for="inputPhoneNumber" class="form-label text-muted mb-0">{{__("Teléfono")}} <span class="text-danger">*</span></label>
+                                <label for="inputPhoneNumber" class="form-label text-muted mb-0">{{__("Teléfono")}} @if(empty($manualRegistration)) <span class="text-danger">*</span> @endif</label>
                                 <div class="d-flex">
                                     <div class="w-25">
-                                        <input type="text" inputmode="tel" name="phone_code" class="form-control rounded-0 rounded-start" id="inputPhoneCode" placeholder="+00" value="{{old('phone_code')}}" maxlength="5" pattern="\+?[0-9]{1,4}" required>
+                                        <input type="text" inputmode="tel" name="phone_code" class="form-control rounded-0 rounded-start" id="inputPhoneCode" placeholder="+00" value="{{old('phone_code')}}" maxlength="5" pattern="\+?[0-9]{1,4}" @if(empty($manualRegistration)) required @endif>
                                         <small>{{ __('Cod. País') }}</small>
                                     </div>
                                     <div class="w-25">
-                                        <input type="text" inputmode="numeric" name="phone_code_city" class="form-control rounded-0" id="inputPhoneCodeCity" placeholder="01" value="{{old('phone_code_city')}}" maxlength="5" pattern="[0-9]{1,5}" required>
+                                        <input type="text" inputmode="numeric" name="phone_code_city" class="form-control rounded-0" id="inputPhoneCodeCity" placeholder="01" value="{{old('phone_code_city')}}" maxlength="5" pattern="[0-9]{1,5}" @if(empty($manualRegistration)) required @endif>
                                         <small>{{ __('Ciudad') }}</small>
                                     </div>
                                     <div class="w-50">
-                                        <input type="text" inputmode="tel" name="phone_number" class="form-control rounded-0 rounded-end" id="inputPhoneNumber" placeholder="8765432" value="{{old('phone_number')}}" maxlength="20" pattern="\+?[0-9 ()-]{7,20}" required>
+                                        <input type="text" inputmode="tel" name="phone_number" class="form-control rounded-0 rounded-end" id="inputPhoneNumber" placeholder="8765432" value="{{old('phone_number')}}" maxlength="20" pattern="\+?[0-9 ()-]{7,20}" @if(empty($manualRegistration)) required @endif>
                                         <small>{{ __('Número') }}</small>
                                     </div>
                                 </div>
@@ -220,14 +220,14 @@
                             </div>
 
                             <div class="col-md-4">
-                                <label for="inputWhatsappNumber" class="form-label text-muted mb-0">{{__("WhatsApp")}} <span class="text-danger">*</span></label>
+                                <label for="inputWhatsappNumber" class="form-label text-muted mb-0">{{__("WhatsApp")}} @if(empty($manualRegistration)) <span class="text-danger">*</span> @endif</label>
                                 <div class="d-flex">
                                     <div class="w-25">
-                                        <input type="text" inputmode="tel" name="whatsapp_code" class="form-control rounded-0 rounded-start" id="inputWhatsappCode" placeholder="+00" value="{{ old('whatsapp_code', $user->whatsapp_code) }}" maxlength="5" pattern="\+?[0-9]{1,4}" required>
+                                        <input type="text" inputmode="tel" name="whatsapp_code" class="form-control rounded-0 rounded-start" id="inputWhatsappCode" placeholder="+00" value="{{ old('whatsapp_code', $user->whatsapp_code) }}" maxlength="5" pattern="\+?[0-9]{1,4}" @if(empty($manualRegistration)) required @endif>
                                         <small>{{ __('Cod. País') }}</small>
                                     </div>
                                     <div class="w-75">
-                                        <input type="text" inputmode="tel" name="whatsapp_number" class="form-control rounded-0 rounded-end" id="inputWhatsappNumber" placeholder="8765432" value="{{ old('whatsapp_number', $user->whatsapp_number) }}" maxlength="20" pattern="\+?[0-9 ()-]{7,20}" required>
+                                        <input type="text" inputmode="tel" name="whatsapp_number" class="form-control rounded-0 rounded-end" id="inputWhatsappNumber" placeholder="8765432" value="{{ old('whatsapp_number', $user->whatsapp_number) }}" maxlength="20" pattern="\+?[0-9 ()-]{7,20}" @if(empty($manualRegistration)) required @endif>
                                         <small>{{ __('Número') }}</small>
                                     </div>
                                 </div>
@@ -236,8 +236,8 @@
                             </div>
 
                             <div class="col-md-12">
-                                <label for="inputWorkplace" class="form-label text-muted mb-0">{{__("Centro de trabajo")}} <span class="text-danger">*</span></label>
-                                <input type="text" name="workplace" class="form-control" id="inputWorkplace" value="{{old('workplace')}}" required>
+                                <label for="inputWorkplace" class="form-label text-muted mb-0">{{__("Centro de trabajo")}} @if(empty($manualRegistration)) <span class="text-danger">*</span> @endif</label>
+                                <input type="text" name="workplace" class="form-control" id="inputWorkplace" value="{{old('workplace')}}" @if(empty($manualRegistration)) required @endif>
                                 {!!$errors->first("workplace", "<span class='text-danger'>:message</span>")!!}
                             </div>
 
@@ -260,14 +260,14 @@
                             @endif
 
                             <div class="col-md-6">
-                                <label for="inputSolapinName" class="form-label text-muted mb-0">{{__("Solapín/Gafete")}} <span class="text-danger">*</span> <small class="fw-normal">({{ __("Un nombre y un apellido") }})</small></label>
+                                <label for="inputSolapinName" class="form-label text-muted mb-0">{{__("Solapín/Gafete")}} @if(empty($manualRegistration)) <span class="text-danger">*</span> @endif <small class="fw-normal">({{ __("Un nombre y un apellido") }})</small></label>
                                 <div class="d-flex gap-2">
                                     <div class="w-50">
-                                        <input type="text" class="form-control convert_mayus" name="solapin_name" id="inputSolapinName" value="{{ old('solapin_name', $user->solapin_name) }}" placeholder="Nombre" required>
+                                        <input type="text" class="form-control convert_mayus" name="solapin_name" id="inputSolapinName" value="{{ old('solapin_name', $user->solapin_name) }}" placeholder="Nombre" @if(empty($manualRegistration)) required @endif>
                                         {!!$errors->first("solapin_name", "<span class='text-danger'>:message</span>")!!}
                                     </div>
                                     <div class="w-50">
-                                        <input type="text" class="form-control convert_mayus" name="solapin_lastname" id="inputSolapinLastname" value="{{ old('solapin_lastname', $user->solapin_lastname) }}" placeholder="Apellido" required>
+                                        <input type="text" class="form-control convert_mayus" name="solapin_lastname" id="inputSolapinLastname" value="{{ old('solapin_lastname', $user->solapin_lastname) }}" placeholder="Apellido" @if(empty($manualRegistration)) required @endif>
                                         {!!$errors->first("solapin_lastname", "<span class='text-danger'>:message</span>")!!}
                                     </div>
                                 </div>
@@ -371,19 +371,19 @@
                                             <div class="d-flex align-items-center gap-2">
                                                 <div>
                                                     <div class="fw-bold text-dark">{{ __('Datos del acompañante') }}</div>
-                                                    <small class="text-muted">{{ __('Completa todos los campos para registrar al acompañante.') }}</small>
+                                                    <small class="text-muted">{{ !empty($manualRegistration) ? __('Completa los datos disponibles del acompañante.') : __('Completa todos los campos para registrar al acompañante.') }}</small>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="card-body">
                                             <div class="row g-3">
                                                 <div class="col-md-5">
-                                                    <label for="accompanist_name" class="form-label text-muted mb-1">{{__("Nombre completo")}} <span class="text-danger">*</span></label>
+                                                    <label for="accompanist_name" class="form-label text-muted mb-1">{{__("Nombre completo")}} @if(empty($manualRegistration)) <span class="text-danger">*</span> @endif</label>
                                                     <input type="text" class="form-control convert_mayus" name="accompanist_name" id="accompanist_name" value="{{ old('accompanist_name') }}">
                                                     {!!$errors->first("accompanist_name", "<span class='text-danger'>:message</span>")!!}
                                                 </div>
                                                 <div class="col-md-3">
-                                                    <label for="accompanist_typedocument" class="form-label text-muted mb-1">{{__("Tipo documento")}} <span class="text-danger">*</span></label>
+                                                    <label for="accompanist_typedocument" class="form-label text-muted mb-1">{{__("Tipo documento")}} @if(empty($manualRegistration)) <span class="text-danger">*</span> @endif</label>
                                                     <select class="form-select" name="accompanist_typedocument" id="accompanist_typedocument">
                                                         <option value="">Seleccione...</option>
                                                         <option value="DNI" @if(old('accompanist_typedocument') === 'DNI') selected @endif>DNI</option>
@@ -393,17 +393,17 @@
                                                     {!!$errors->first("accompanist_typedocument", "<span class='text-danger'>:message</span>")!!}
                                                 </div>
                                                 <div class="col-md-4">
-                                                    <label for="accompanist_numdocument" class="form-label text-muted mb-0">{{__("N° documento")}} <span class="text-danger">*</span></label>
+                                                    <label for="accompanist_numdocument" class="form-label text-muted mb-0">{{__("N° documento")}} @if(empty($manualRegistration)) <span class="text-danger">*</span> @endif</label>
                                                     <input type="text" class="form-control" name="accompanist_numdocument" id="accompanist_numdocument" value="{{ old('accompanist_numdocument') }}">
                                                     {!!$errors->first("accompanist_numdocument", "<span class='text-danger'>:message</span>")!!}
                                                 </div>
                                                 <div class="col-md-5">
-                                                    <label for="accompanist_phone" class="form-label text-muted mb-0">{{__("Teléfono")}} <span class="text-danger">*</span></label>
+                                                    <label for="accompanist_phone" class="form-label text-muted mb-0">{{__("Teléfono")}} @if(empty($manualRegistration)) <span class="text-danger">*</span> @endif</label>
                                                     <input type="text" inputmode="tel" class="form-control" name="accompanist_phone" id="accompanist_phone" value="{{ old('accompanist_phone') }}" placeholder="+51 987654321" maxlength="22" pattern="\+?[0-9 ()-]{7,22}">
                                                     {!!$errors->first("accompanist_phone", "<span class='text-danger'>:message</span>")!!}
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label for="accompanist_solapin" class="form-label text-muted mb-0">{{__("Solapín/Gafete")}} <span class="text-danger">*</span></label>
+                                                    <label for="accompanist_solapin" class="form-label text-muted mb-0">{{__("Solapín/Gafete")}} @if(empty($manualRegistration)) <span class="text-danger">*</span> @endif</label>
                                                     <input type="text" class="form-control convert_mayus" name="accompanist_solapin" id="accompanist_solapin" value="{{ old('accompanist_solapin') }}">
                                                     {!!$errors->first("accompanist_solapin", "<span class='text-danger'>:message</span>")!!}
                                                 </div>
@@ -455,10 +455,10 @@
                                             <div class="tour-companion-control mt-3 @if(!$tourChecked) d-none @endif">
                                                 <div class="form-check"><input type="hidden" name="tour_has_accompanist[{{$tour->id}}]" value="0"><input type="checkbox" class="form-check-input tour-companion-option" name="tour_has_accompanist[{{$tour->id}}]" id="tour_companion_{{$tour->id}}" value="1" data-companion-price="{{$tour->accompanist_price}}" @if($tourCompanion) checked @endif><label class="form-check-label" for="tour_companion_{{$tour->id}}">Agregar acompañante al tour (+ US$ {{number_format($tour->accompanist_price,2)}})</label></div>
                                                 <div class="tour-companion-fields row g-2 mt-1 @if(!$tourCompanion) d-none @endif">
-                                                    <div class="col-md-4"><label class="form-label mb-0">Nombre completo *</label><input class="form-control" name="tour_companion[{{$tour->id}}][name]" value="{{old("tour_companion.$tour->id.name")}}"></div>
-                                                    <div class="col-md-2"><label class="form-label mb-0">Tipo documento *</label><select class="form-select" name="tour_companion[{{$tour->id}}][document_type]"><option value="">Seleccione</option>@foreach(['DNI','Carnet de extranjería','Pasaporte'] as $type)<option value="{{$type}}" @if(old("tour_companion.$tour->id.document_type")===$type) selected @endif>{{$type}}</option>@endforeach</select></div>
-                                                    <div class="col-md-3"><label class="form-label mb-0">N° documento *</label><input class="form-control" name="tour_companion[{{$tour->id}}][document_number]" value="{{old("tour_companion.$tour->id.document_number")}}"></div>
-                                                    <div class="col-md-3"><label class="form-label mb-0">Teléfono *</label><input class="form-control" inputmode="tel" name="tour_companion[{{$tour->id}}][phone]" value="{{old("tour_companion.$tour->id.phone")}}"></div>
+                                                    <div class="col-md-4"><label class="form-label mb-0">Nombre completo @if(empty($manualRegistration)) * @endif</label><input class="form-control" name="tour_companion[{{$tour->id}}][name]" value="{{old("tour_companion.$tour->id.name")}}"></div>
+                                                    <div class="col-md-2"><label class="form-label mb-0">Tipo documento @if(empty($manualRegistration)) * @endif</label><select class="form-select" name="tour_companion[{{$tour->id}}][document_type]"><option value="">Seleccione</option>@foreach(['DNI','Carnet de extranjería','Pasaporte'] as $type)<option value="{{$type}}" @if(old("tour_companion.$tour->id.document_type")===$type) selected @endif>{{$type}}</option>@endforeach</select></div>
+                                                    <div class="col-md-3"><label class="form-label mb-0">N° documento @if(empty($manualRegistration)) * @endif</label><input class="form-control" name="tour_companion[{{$tour->id}}][document_number]" value="{{old("tour_companion.$tour->id.document_number")}}"></div>
+                                                    <div class="col-md-3"><label class="form-label mb-0">Teléfono @if(empty($manualRegistration)) * @endif</label><input class="form-control" inputmode="tel" name="tour_companion[{{$tour->id}}][phone]" value="{{old("tour_companion.$tour->id.phone")}}"></div>
                                                 </div>
                                             </div>
                                         </div></div>
@@ -490,18 +490,18 @@
 
                                     <div class="row mt-2 d-none" id="dv_invoice_info">
                                         <div class="col-md-4">
-                                            <label for="invoice_ruc" class="form-label fw-semibold mb-1">{{ __('RUC') }} <span class="text-danger">*</span></label>
+                                            <label for="invoice_ruc" class="form-label fw-semibold mb-1">{{ __('RUC') }} @if(empty($manualRegistration)) <span class="text-danger">*</span> @endif</label>
                                             <input type="text" inputmode="numeric" name="invoice_ruc" id="invoice_ruc" class="form-control" value="{{ old('invoice_ruc') }}" placeholder="Ingrese 11 dígitos" minlength="11" maxlength="11" pattern="[0-9]{11}" autocomplete="off">
                                             <small class="text-muted">Solo números, 11 dígitos.</small>
                                             {!!$errors->first("invoice_ruc", "<span class='text-danger d-block'>:message</span>")!!}
                                         </div>
                                         <div class="col-md-4">
-                                            <label for="invoice_social_reason" class="form-label fw-semibold mb-1">{{ __('Razón social') }} <span class="text-danger">*</span></label>
+                                            <label for="invoice_social_reason" class="form-label fw-semibold mb-1">{{ __('Razón social') }} @if(empty($manualRegistration)) <span class="text-danger">*</span> @endif</label>
                                             <input type="text" name="invoice_social_reason" id="invoice_social_reason" class="form-control" value="{{ old('invoice_social_reason') }}" placeholder="Razón social">
                                             {!!$errors->first("invoice_social_reason", "<span class='text-danger d-block'>:message</span>")!!}
                                         </div>
                                         <div class="col-md-4">
-                                            <label for="invoice_address" class="form-label fw-semibold mb-1">{{ __('Dirección fiscal') }} <span class="text-danger">*</span></label>
+                                            <label for="invoice_address" class="form-label fw-semibold mb-1">{{ __('Dirección fiscal') }} @if(empty($manualRegistration)) <span class="text-danger">*</span> @endif</label>
                                             <input type="text" name="invoice_address" id="invoice_address" class="form-control" value="{{ old('invoice_address') }}" placeholder="Dirección">
                                             {!!$errors->first("invoice_address", "<span class='text-danger d-block'>:message</span>")!!}
                                         </div>

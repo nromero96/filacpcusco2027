@@ -1042,11 +1042,7 @@ class InscriptionController extends Controller
 
         $selectedCategory = CategoryInscription::where('status', 'active')->find($request->category_inscription_id);
         $isSpecialCategory = fn () => $selectedCategory && $selectedCategory->uses_special_code;
-        $hasAccompanist = fn () => $request->accompanist === 'si';
         $needsInvoice = fn () => $request->country === 'Perú' && $request->invoice === 'si';
-        $needsDocument = fn () => $selectedCategory && $selectedCategory->requires_document;
-        $needsVoucher = fn () => $request->payment_method === 'Transferencia/Depósito' && $selectedCategory
-            && ($selectedCategory->requires_voucher || count($request->input('course_ids', [])) > 0 || count($request->input('tour_ids', [])) > 0);
         $temporaryUploadExists = function ($attribute, $value, $fail) {
             if ($value === null || $value === '') return;
             if (!TemporaryFile::where('folder', trim($value, '[]"'))->exists()) {
@@ -1056,39 +1052,39 @@ class InscriptionController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:100',
-            'lastname' => 'required|string|max:100',
+            'lastname' => 'nullable|string|max:100',
             'second_lastname' => 'nullable|string|max:100',
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'document_type' => ['required', Rule::in(['DNI', 'Carnet de extranjería', 'Pasaporte'])],
-            'document_number' => 'required|string|max:30',
-            'country' => ['required', Rule::exists('countries', 'name')],
-            'state' => 'required|string|max:100',
-            'city' => 'required|string|max:100',
-            'address' => 'required|string|max:255',
-            'postal_code' => 'required|string|max:20',
-            'phone_code' => ['required', 'regex:/^\+?\d{1,4}$/'],
-            'phone_code_city' => ['required', 'regex:/^\d{1,5}$/'],
-            'phone_number' => ['required', new PhoneNumber],
-            'whatsapp_code' => ['required', 'regex:/^\+?\d{1,4}$/'],
-            'whatsapp_number' => ['required', new PhoneNumber],
-            'workplace' => 'required|string|max:255',
-            'solapin_name' => 'required|string|max:100',
-            'solapin_lastname' => 'required|string|max:100',
+            'document_type' => ['nullable', Rule::in(['DNI', 'Carnet de extranjería', 'Pasaporte'])],
+            'document_number' => 'nullable|string|max:30',
+            'country' => ['nullable', Rule::exists('countries', 'name')],
+            'state' => 'nullable|string|max:100',
+            'city' => 'nullable|string|max:100',
+            'address' => 'nullable|string|max:255',
+            'postal_code' => 'nullable|string|max:20',
+            'phone_code' => ['nullable', 'regex:/^\+?\d{1,4}$/'],
+            'phone_code_city' => ['nullable', 'regex:/^\d{1,5}$/'],
+            'phone_number' => ['nullable', new PhoneNumber],
+            'whatsapp_code' => ['nullable', 'regex:/^\+?\d{1,4}$/'],
+            'whatsapp_number' => ['nullable', new PhoneNumber],
+            'workplace' => 'nullable|string|max:255',
+            'solapin_name' => 'nullable|string|max:100',
+            'solapin_lastname' => 'nullable|string|max:100',
             'category_inscription_id' => ['required', Rule::exists('category_inscriptions', 'id')->where(fn ($query) => $query->where('status', 'active')->where('type', 'radio'))],
-            'specialcode' => [Rule::requiredIf($isSpecialCategory), 'nullable', 'string|max:100'],
+            'specialcode' => [Rule::requiredIf($isSpecialCategory), 'nullable', 'string', 'max:100'],
             'accompanist' => ['nullable', Rule::in(['si'])],
-            'accompanist_name' => [Rule::requiredIf($hasAccompanist), 'nullable', 'string', 'max:200'],
-            'accompanist_typedocument' => [Rule::requiredIf($hasAccompanist), 'nullable', Rule::in(['DNI', 'Carnet de extranjería', 'Pasaporte'])],
-            'accompanist_numdocument' => [Rule::requiredIf($hasAccompanist), 'nullable', 'string', 'max:30'],
-            'accompanist_phone' => [Rule::requiredIf($hasAccompanist), 'nullable', new PhoneNumber],
-            'accompanist_solapin' => [Rule::requiredIf($hasAccompanist), 'nullable', 'string', 'max:100'],
+            'accompanist_name' => ['nullable', 'string', 'max:200'],
+            'accompanist_typedocument' => ['nullable', Rule::in(['DNI', 'Carnet de extranjería', 'Pasaporte'])],
+            'accompanist_numdocument' => ['nullable', 'string', 'max:30'],
+            'accompanist_phone' => ['nullable', new PhoneNumber],
+            'accompanist_solapin' => ['nullable', 'string', 'max:100'],
             'invoice' => ['required', Rule::in(['no', 'si']), function ($attribute, $value, $fail) use ($request) {
                 if ($request->country !== 'Perú' && $value === 'si') $fail('La factura solo está disponible para inscripciones de Perú.');
             }],
-            'invoice_ruc' => [Rule::requiredIf($needsInvoice), 'nullable', new ValidRuc],
-            'invoice_social_reason' => [Rule::requiredIf($needsInvoice), 'nullable', 'string', 'max:255'],
-            'invoice_address' => [Rule::requiredIf($needsInvoice), 'nullable', 'string', 'max:255'],
+            'invoice_ruc' => ['nullable', new ValidRuc],
+            'invoice_social_reason' => ['nullable', 'string', 'max:255'],
+            'invoice_address' => ['nullable', 'string', 'max:255'],
             'payment_method' => ['required', Rule::in(['Transferencia/Depósito', 'Tarjeta'])],
             'course_ids' => 'nullable|array',
             'course_ids.*' => ['integer', 'distinct', Rule::exists('courses', 'id')->where(fn ($query) => $query->where('status', 'active'))],
@@ -1096,10 +1092,10 @@ class InscriptionController extends Controller
             'tour_ids.*' => ['integer', 'distinct', Rule::exists('tours', 'id')->where(fn($query)=>$query->where('status','active'))],
             'tour_has_accompanist' => 'nullable|array',
             'tour_companion' => 'nullable|array',
-            'document_file' => [Rule::requiredIf($needsDocument), 'nullable', 'string', $temporaryUploadExists],
-            'voucher_file' => [Rule::requiredIf($needsVoucher), 'nullable', 'string', $temporaryUploadExists],
+            'document_file' => ['nullable', 'string', $temporaryUploadExists],
+            'voucher_file' => ['nullable', 'string', $temporaryUploadExists],
         ]);
-        $this->validateTourCompanions($request);
+        $this->validateTourCompanions($request, false);
 
         DB::beginTransaction();
 
@@ -1647,15 +1643,15 @@ class InscriptionController extends Controller
 
     }
 
-    private function validateTourCompanions(Request $request): void
+    private function validateTourCompanions(Request $request, bool $required = true): void
     {
         foreach ($request->input('tour_ids', []) as $tourId) {
             if (!$request->boolean("tour_has_accompanist.{$tourId}")) continue;
             Validator::make($request->input("tour_companion.{$tourId}", []), [
-                'name' => 'required|string|max:200',
-                'document_type' => ['required', Rule::in(['DNI', 'Carnet de extranjería', 'Pasaporte'])],
-                'document_number' => 'required|string|max:30',
-                'phone' => ['required', new PhoneNumber],
+                'name' => ($required ? 'required' : 'nullable').'|string|max:200',
+                'document_type' => [$required ? 'required' : 'nullable', Rule::in(['DNI', 'Carnet de extranjería', 'Pasaporte'])],
+                'document_number' => ($required ? 'required' : 'nullable').'|string|max:30',
+                'phone' => [$required ? 'required' : 'nullable', new PhoneNumber],
             ], [], ['name'=>'nombre del acompañante','document_type'=>'tipo de documento','document_number'=>'número de documento','phone'=>'teléfono del acompañante'])->validate();
         }
     }

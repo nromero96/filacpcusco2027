@@ -1,6 +1,7 @@
 const btnSubInscription = document.getElementById("btnSubInscription");
 const formErrorSummary = document.getElementById('formErrorSummary');
 const formErrorMessage = document.getElementById('formErrorMessage');
+const isManualRegistration = document.getElementById('formInscription')?.dataset.manualRegistration === '1';
 
 function showFormError(message, field = null) {
   formErrorMessage.textContent = message;
@@ -81,7 +82,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return false;
         }
 
-        if (selectedRadioCategoryInscription.dataset.requiresDocument === '1') {
+        if (!isManualRegistration && selectedRadioCategoryInscription.dataset.requiresDocument === '1') {
             if (!validarArchivoFilePond('document_file', "Debe adjuntar documento probatorio de categoría (Título, Constancia, Carnet profesional).")) {
                 return false;
             }
@@ -92,7 +93,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return false;
         }
 
-        if(selectedRadioPaymentMethod.value === 'Transferencia/Depósito') {
+        if(!isManualRegistration && selectedRadioPaymentMethod.value === 'Transferencia/Depósito') {
           if (selectCategoryRadioButtons.dataset.requiresVoucher === '1') {
               if (!validarArchivoFilePond('voucher_file', "Debe adjuntar un comprobante de transferencia o depósito")) {
                   return false;
@@ -153,12 +154,8 @@ function calculateTotalPrice() {
 
       //remove class d-none in dv_accompanist
       dvAccompanist.classList.remove('d-none');
-      inputsaccomp.forEach(input => {
-        input.setAttribute('required', 'required');
-      });
-      selectsaccomp.forEach(select => {
-        select.setAttribute('required', 'required');
-      });
+      inputsaccomp.forEach(input => input.required = !isManualRegistration);
+      selectsaccomp.forEach(select => select.required = !isManualRegistration);
 
 
     }else{
@@ -200,7 +197,7 @@ function calculateTotalPrice() {
     if (!option.checked) companion.checked = false;
     const fields = card.querySelector('.tour-companion-fields');
     fields.classList.toggle('d-none', !option.checked || !companion.checked);
-    fields.querySelectorAll('input,select').forEach(field => field.required = option.checked && companion.checked);
+    fields.querySelectorAll('input,select').forEach(field => field.required = !isManualRegistration && option.checked && companion.checked);
     if (option.checked && companion.checked) toursTotal += parseFloat(companion.dataset.companionPrice) || 0;
   });
   totalPrice += toursTotal;
@@ -326,14 +323,14 @@ function handleCategoryRadioButtons(){
     }
 
     // Handle CP Required
-    cprequired.classList.toggle('d-none', selectedCategory.dataset.requiresVoucher !== '1');
+    cprequired.classList.toggle('d-none', isManualRegistration || selectedCategory.dataset.requiresVoucher !== '1');
 
 
     if(requiresDocument){
 
       //Document file required
       dvDocumentFile.classList.remove('d-none');
-      inputDocumentFile.setAttribute('required', 'required');
+      inputDocumentFile.required = !isManualRegistration;
 
       //Special code required not validation
       dvSpecialCode.classList.add('d-none');
@@ -438,9 +435,9 @@ function handleInvoice(){
     const selectedValueInvoice = document.querySelector('input[type="radio"][name="invoice"]:checked').value;
     if(selectedValueInvoice === 'si'){
         dvInvoiceInfo.classList.remove('d-none');
-        inputInvoiceRuc.setAttribute('required', 'required');
-        inputInvoiceSocialReason.setAttribute('required', 'required');
-        inputInvoiceAddress.setAttribute('required', 'required');
+        inputInvoiceRuc.required = !isManualRegistration;
+        inputInvoiceSocialReason.required = !isManualRegistration;
+        inputInvoiceAddress.required = !isManualRegistration;
     }else{
         dvInvoiceInfo.classList.add('d-none');
         inputInvoiceRuc.removeAttribute('required');
