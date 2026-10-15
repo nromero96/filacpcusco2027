@@ -68,8 +68,8 @@
 
                     <p style="margin:20px 0 12px; font-size:15px; line-height:23px;">Muchas gracias por participar en el XIV Congreso Bolivariano FILACP 2027.</p>
                     <p style="margin:0 0 16px; font-size:15px; line-height:23px;">Puede consultar el detalle de su inscripción en el siguiente enlace:</p>
-                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 22px;"><tr><td bgcolor="#1156cf"><a href="{{ url('/inscripcion/'.$datainscription->id) }}" style="display:inline-block; padding:11px 18px; color:#fff; font-size:14px; font-weight:bold; text-decoration:none;">Ver inscripción</a></td></tr></table>
-                    <p style="margin:0; padding-top:18px; border-top:1px solid #e2e5e9; font-size:13px; line-height:20px; color:#68717c;">Atentamente,<br>Inscripciones<br><strong>XIV CONGRESO BOLIVARIANO FILACP 2027</strong><br>Millie Estrada<br>WhatsApp: +51 983 481 269<br><a href="mailto:inscripciones@bolivarianofilacpcusco2027.org" style="color:#1156cf; text-decoration:none;">inscripciones@bolivarianofilacpcusco2027.org</a></p>
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 22px;"><tr><td bgcolor="#16753a"><a href="{{ url('/inscriptions/'.$datainscription->id) }}" style="display:inline-block; padding:11px 18px; color:#fff; font-size:14px; font-weight:bold; text-decoration:none;">Ver inscripción</a></td></tr></table>
+                    <p style="margin:0; padding-top:18px; border-top:1px solid #e2e5e9; font-size:13px; line-height:20px; color:#68717c;">Atentamente,<br><br>Millie Estrada<br>Inscripciones<br><strong>XIV CONGRESO BOLIVARIANO FILACP 2027</strong><br>WhatsApp: +51 983 481 269<br><a href="mailto:inscripciones@bolivarianofilacpcusco2027.org" style="color:#1156cf; text-decoration:none;">inscripciones@bolivarianofilacpcusco2027.org</a><br>www.bolivarianofilacpcusco2027.org</p>
                 </td></tr>
             </table>
             <!--[if mso]></td></tr></table><![endif]-->

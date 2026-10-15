@@ -1111,6 +1111,7 @@ class InscriptionController extends Controller
             'solapin_name' => 'nullable|string|max:100',
             'solapin_lastname' => 'nullable|string|max:100',
             'category_inscription_id' => ['required', Rule::exists('category_inscriptions', 'id')->where(fn ($query) => $query->where('status', 'active')->where('type', 'radio'))],
+            'price_category' => ['required', 'numeric', 'min:0', 'max:999999.99', 'regex:/^\d{1,6}(\.\d{1,2})?$/'],
             'specialcode' => [Rule::requiredIf($isSpecialCategory), 'nullable', 'string', 'max:100'],
             'accompanist' => ['nullable', Rule::in(['si'])],
             'accompanist_name' => ['nullable', 'string', 'max:200'],
@@ -1219,7 +1220,7 @@ class InscriptionController extends Controller
 
             $category_inscription = CategoryInscription::find($request->category_inscription_id);
 
-            $inscription->price_category = $category_inscription->uses_special_code ? $specialAmount : $category_inscription->price;
+            $inscription->price_category = (float) $request->price_category;
             $inscription->accompanist_id = $data_accompanist_id;
             $categoryAccompanist = CategoryInscription::where('name', 'Acompañante')->first();
             $inscription->price_accompanist = $data_accompanist_id && !$category_inscription->waives_accompanist_fee

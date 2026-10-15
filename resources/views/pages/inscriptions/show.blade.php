@@ -276,36 +276,35 @@
 
                             </div>
 
-                            @if($inscription->invoice == 'si')
                             <div class="col-md-12">
                                 <div class="card px-3 py-3">
-                                    <label for="" class="form-label fw-bold mb-0">
-                                        @if ($inscription->user_country == 'Perú')
-                                            {{ __('Factura') }}
-                                        @else
-                                            {{ __('Boleta de Pago') }}
-                                        @endif
-                                        :
-                                    </label>
+                                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                        <label class="form-label fw-bold mb-0">{{ __('Tipo de comprobante') }}:</label>
+                                        <span class="badge {{ $inscription->invoice === 'si' ? 'badge-light-primary' : 'badge-light-secondary' }}">
+                                            {{ $inscription->invoice === 'si' ? __('Factura') : __('Boleta') }}
+                                        </span>
+                                    </div>
 
+                                    @if($inscription->invoice === 'si')
+                                    <div class="fw-semibold text-dark mt-3">{{ __('Datos para facturación') }}</div>
                                     <div class="row mt-1" id="dv_invoice_info">
                                         <div class="col-md-4">
-                                            <label class="form-label fw-bold mb-0">@if ($inscription->user_country == 'Perú') RUC @else N° de Identificación Tributaria @endif:</label><br>
-                                            <span class="bx-text">{{ $inscription->invoice_ruc }}</span>
+                                            <label class="form-label fw-bold mb-0">RUC:</label><br>
+                                            <span class="bx-text">{{ $inscription->invoice_ruc ?: 'No registrado' }}</span>
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label fw-bold mb-0">{{ __('Razón social') }}</label><br>
-                                            <span class="bx-text">{{ $inscription->invoice_social_reason }}</span>
+                                            <span class="bx-text">{{ $inscription->invoice_social_reason ?: 'No registrado' }}</span>
                                         </div>
                                         <div class="col-md-4">
-                                            <label class="form-label fw-bold mb-0">{{ __('Dirección') }}</label><br>
-                                            <span class="bx-text">{{ $inscription->invoice_address }}</span>
+                                            <label class="form-label fw-bold mb-0">{{ __('Dirección fiscal') }}</label><br>
+                                            <span class="bx-text">{{ $inscription->invoice_address ?: 'No registrado' }}</span>
                                         </div>
                                     </div>
+                                    @endif
 
                                 </div>
                             </div>
-                            @endif
 
                             @if(!in_array($inscription->category_inscription_name, ['Invitado']))
                             <div class="col-md-12">

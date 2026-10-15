@@ -134,6 +134,7 @@ const tourCheckboxes = document.querySelectorAll('.tour-option');
 const tourCompanionCheckboxes = document.querySelectorAll('.tour-companion-option');
 const toursTotalElement = document.getElementById('text_tours_total');
 const paymentotalElement = document.getElementById('paymentotal');
+const manualCategoryPrice = document.getElementById('manual_price_category');
 
 // Función para calcular el precio total
 function calculateTotalPrice() {
@@ -142,7 +143,9 @@ function calculateTotalPrice() {
   // Suma los valores de los radios seleccionados
   categoryRadioButtons.forEach(radio => {
     if (radio.checked) {
-      const catPrice = parseFloat(radio.getAttribute('data-catprice'));
+      const catPrice = manualCategoryPrice
+        ? parseFloat(manualCategoryPrice.value || 0)
+        : parseFloat(radio.getAttribute('data-catprice'));
       totalPrice += catPrice;
     }
   });
@@ -244,10 +247,15 @@ function calculateTotalPrice() {
 // Agrega un event listener para los cambios en los radios y checkboxes
 categoryRadioButtons.forEach(radio => {
   radio.addEventListener('change', handleCategoryRadioButtons);
-  radio.addEventListener('change', calculateTotalPrice);
+  radio.addEventListener('change', () => {
+    if (manualCategoryPrice) manualCategoryPrice.value = Number(radio.dataset.originalPrice || radio.dataset.catprice || 0).toFixed(2);
+    calculateTotalPrice();
+  });
   radio.addEventListener('change', updateSelectedCategoryStyle);
   radio.addEventListener('change', clearFormError);
 });
+
+if (manualCategoryPrice) manualCategoryPrice.addEventListener('input', calculateTotalPrice);
 
 courseCheckboxes.forEach(checkbox => {
   checkbox.addEventListener('change', calculateTotalPrice);
@@ -501,6 +509,7 @@ btnValidateSpecialCode.addEventListener('click', function(){
           btnValidateSpecialCode.textContent = 'Validar';
           specialCodeVerify.value = 'valid';
           radioCategory.setAttribute('data-catprice', Math.floor(response.price));
+          if (manualCategoryPrice) manualCategoryPrice.value = Number(response.price || 0).toFixed(2);
 
           
 
@@ -526,6 +535,7 @@ btnValidateSpecialCode.addEventListener('click', function(){
           inputSpecialCode.removeAttribute('readonly');
           specialCodeVerify.value = '';
           radioCategory.setAttribute('data-catprice', '0.00');
+          if (manualCategoryPrice) manualCategoryPrice.value = '0.00';
           btnValidateSpecialCode.disabled = false;
           btnValidateSpecialCode.textContent = 'Validar';
           inputSpecialCode.classList.add('is-invalid');
@@ -561,6 +571,7 @@ btnClearSpecialCode.addEventListener('click', function(){
     specialCodeVerify.value = '';
     inputSpecialCode.classList.remove('is-invalid', 'field-valid');
     selectedCategory.setAttribute('data-catprice', selectedCategory.dataset.originalPrice);
+    if (manualCategoryPrice) manualCategoryPrice.value = Number(selectedCategory.dataset.originalPrice || 0).toFixed(2);
 
     //Mostrar divs que se necesitan
     dvDocumentFile.classList.remove('d-none');

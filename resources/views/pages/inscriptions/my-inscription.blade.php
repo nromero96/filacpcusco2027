@@ -373,6 +373,23 @@
                                     </table>
                                 </div>
                                 {!!$errors->first("category_inscription_id", "<span class='text-danger d-block mt-1'>:message</span>")!!}
+                                @if(!empty($manualRegistration))
+                                    <div class="form-panel mt-3">
+                                        <div class="row align-items-center g-2">
+                                            <div class="col-md-8">
+                                                <label for="manual_price_category" class="form-label fw-bold mb-0">{{ __('Precio de categoría aplicado') }} <span class="text-danger">*</span></label>
+                                                <small class="text-muted d-block">{{ __('Se carga el precio registrado, pero puede modificarlo para esta inscripción.') }}</small>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="input-group">
+                                                    <span class="input-group-text">US$</span>
+                                                    <input type="number" name="price_category" id="manual_price_category" class="form-control" value="{{ old('price_category') }}" min="0" max="999999.99" step="0.01" inputmode="decimal" required>
+                                                </div>
+                                                {!!$errors->first("price_category", "<span class='text-danger d-block'>:message</span>")!!}
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
 
                                 <div id="dv_document_file" class="d-none">
                                     <small class="text-danger"><b>{{__("Nota:")}}</b> {{__("* Debe adjuntar documento probatorio de categoría (Título, Constancia, Carnet profesional) (.pdf/.jpg)")}}</small>
