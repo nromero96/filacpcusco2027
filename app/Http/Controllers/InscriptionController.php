@@ -515,42 +515,52 @@ class InscriptionController extends Controller
 
             $inscription = Inscription::findOrFail($id);
             $user = User::findOrFail($inscription->user_id);
-            $hasAccompanist = fn () => $request->boolean('has_accompanist');
-            $needsInvoice = fn () => $request->country === 'Perú' && $request->invoice === 'si';
+            $selectedCategory = CategoryInscription::where('type', 'radio')->find($request->category_inscription_id);
+            $usesSpecialCode = fn () => $selectedCategory && $selectedCategory->uses_special_code;
+            $currentCourseIds = $inscription->courses()->pluck('courses.id')->all();
+            $currentTourIds = $inscription->tours()->pluck('tours.id')->all();
 
             $validated = $request->validate([
                 'name' => 'required|string|max:100',
-                'lastname' => 'required|string|max:100',
+                'lastname' => 'nullable|string|max:100',
                 'second_lastname' => 'nullable|string|max:100',
-                'document_type' => ['required', Rule::in(['DNI', 'Carnet de extranjería', 'Carnet de Extranjería', 'Pasaporte'])],
-                'document_number' => 'required|string|max:30',
-                'country' => ['required', Rule::exists('countries', 'name')],
-                'state' => 'required|string|max:100',
-                'city' => 'required|string|max:100',
-                'address' => 'required|string|max:255',
-                'postal_code' => 'required|string|max:20',
-                'phone_code' => ['required', 'regex:/^\+?\d{1,4}$/'],
-                'phone_code_city' => ['required', 'regex:/^\d{1,5}$/'],
-                'phone_number' => ['required', new PhoneNumber],
-                'whatsapp_code' => ['required', 'regex:/^\+?\d{1,4}$/'],
-                'whatsapp_number' => ['required', new PhoneNumber],
+                'document_type' => ['nullable', Rule::in(['DNI', 'Carnet de extranjería', 'Carnet de Extranjería', 'Pasaporte'])],
+                'document_number' => 'nullable|string|max:30',
+                'country' => ['nullable', Rule::exists('countries', 'name')],
+                'state' => 'nullable|string|max:100',
+                'city' => 'nullable|string|max:100',
+                'address' => 'nullable|string|max:255',
+                'postal_code' => 'nullable|string|max:20',
+                'phone_code' => ['nullable', 'regex:/^\+?\d{1,4}$/'],
+                'phone_code_city' => ['nullable', 'regex:/^\d{1,5}$/'],
+                'phone_number' => ['nullable', new PhoneNumber],
+                'whatsapp_code' => ['nullable', 'regex:/^\+?\d{1,4}$/'],
+                'whatsapp_number' => ['nullable', new PhoneNumber],
                 'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
-                'workplace' => 'required|string|max:255',
-                'solapin_name' => 'required|string|max:100',
-                'solapin_lastname' => 'required|string|max:100',
+                'workplace' => 'nullable|string|max:255',
+                'solapin_name' => 'nullable|string|max:100',
+                'solapin_lastname' => 'nullable|string|max:100',
                 'category_inscription_id' => [
                     'required',
-                    Rule::exists('category_inscriptions', 'id')->where(fn ($query) => $query->where('type', 'radio')),
+                    Rule::exists('category_inscriptions', 'id')->where(fn ($query) => $query->where('type', 'radio')->where(function ($active) use ($inscription) { $active->where('status', 'active')->orWhere('id', $inscription->category_inscription_id); })),
                 ],
-                'price_category' => 'required|numeric|min:0',
-                'price_accompanist' => 'required|numeric|min:0',
-                'special_code' => 'nullable|string|max:100',
+                'price_category' => ['required', 'numeric', 'min:0', 'max:999999.99', 'regex:/^\d{1,6}(\.\d{1,2})?$/'],
+                'price_accompanist' => ['required', 'numeric', 'min:0', 'max:999999.99', 'regex:/^\d{1,6}(\.\d{1,2})?$/'],
+                'special_code' => [Rule::requiredIf($usesSpecialCode), 'nullable', 'string', 'max:100', function ($attribute, $value, $fail) use ($usesSpecialCode, $inscription) {
+                    if (!$usesSpecialCode() || !$value) return;
+                    $code = SpecialCode::where('code', $value)->first();
+                    if (!$code) return $fail('El código especial no existe.');
+                    if (Carbon::parse($code->expiration)->lte(now())) return $fail('El código especial está expirado.');
+                    if ($code->status !== 'Activo') return $fail('El código especial no está activo.');
+                    $uses = Inscription::where('special_code', $value)->where('id', '!=', $inscription->id)->where('status', '!=', 'Rechazado')->count();
+                    if ($uses >= $code->quantity) $fail('El código especial ya está agotado.');
+                }],
                 'has_accompanist' => 'nullable|boolean',
-                'accompanist_name' => [Rule::requiredIf($hasAccompanist), 'nullable', 'string', 'max:200'],
-                'accompanist_typedocument' => [Rule::requiredIf($hasAccompanist), 'nullable', Rule::in(['DNI', 'Carnet de extranjería', 'Pasaporte'])],
-                'accompanist_numdocument' => [Rule::requiredIf($hasAccompanist), 'nullable', 'string', 'max:30'],
-                'accompanist_phone' => [Rule::requiredIf($hasAccompanist), 'nullable', new PhoneNumber],
-                'accompanist_solapin' => [Rule::requiredIf($hasAccompanist), 'nullable', 'string', 'max:100'],
+                'accompanist_name' => ['nullable', 'string', 'max:200'],
+                'accompanist_typedocument' => ['nullable', Rule::in(['DNI', 'Carnet de extranjería', 'Pasaporte'])],
+                'accompanist_numdocument' => ['nullable', 'string', 'max:30'],
+                'accompanist_phone' => ['nullable', new PhoneNumber],
+                'accompanist_solapin' => ['nullable', 'string', 'max:100'],
                 'invoice' => [
                     'required',
                     Rule::in(['no', 'si']),
@@ -560,22 +570,27 @@ class InscriptionController extends Controller
                         }
                     },
                 ],
-                'invoice_ruc' => [Rule::requiredIf($needsInvoice), 'nullable', new ValidRuc],
-                'invoice_social_reason' => [Rule::requiredIf($needsInvoice), 'nullable', 'string', 'max:255'],
-                'invoice_address' => [Rule::requiredIf($needsInvoice), 'nullable', 'string', 'max:255'],
-                'payment_method' => ['required', Rule::in(['Transferencia/Depósito', 'Tarjeta'])],
+                'invoice_ruc' => ['nullable', new ValidRuc],
+                'invoice_social_reason' => ['nullable', 'string', 'max:255'],
+                'invoice_address' => ['nullable', 'string', 'max:255'],
+                'payment_method' => ['required', Rule::in(['Transferencia/Depósito', 'Tarjeta']), function ($attribute, $value, $fail) use ($inscription) { if ($value !== $inscription->payment_method && Payment::where('inscription_id', $inscription->id)->exists()) $fail('No se puede cambiar el método porque la inscripción ya tiene un pago con tarjeta registrado.'); }],
                 'course_ids' => 'nullable|array',
-                'course_ids.*' => ['integer', 'distinct', Rule::exists('courses', 'id')],
+                'course_ids.*' => ['integer', 'distinct', Rule::exists('courses', 'id')->where(fn ($query) => $query->where('status', 'active')->orWhereIn('id', $currentCourseIds))],
                 'tour_ids' => 'nullable|array',
-                'tour_ids.*' => ['integer', 'distinct', Rule::exists('tours', 'id')],
+                'tour_ids.*' => ['integer', 'distinct', Rule::exists('tours', 'id')->where(fn ($query) => $query->where('status', 'active')->orWhereIn('id', $currentTourIds))],
                 'tour_has_accompanist' => 'nullable|array',
                 'tour_companion' => 'nullable|array',
                 'document_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
                 'voucher_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
             ]);
-            $this->validateTourCompanions($request);
+            $this->validateTourCompanions($request, false);
 
-            DB::transaction(function () use ($request, $validated, $inscription, $user, $needsInvoice) {
+            $storedFiles = [];
+            $replacedFiles = [];
+            try {
+                DB::transaction(function () use ($request, $validated, $inscription, $user, &$storedFiles, &$replacedFiles) {
+                $accompanistToDelete = null;
+                $paymentMethodChanged = $inscription->payment_method !== $validated['payment_method'];
                 $existingCoursePrices = $inscription->courses()->get()->pluck('pivot.unit_price', 'id');
                 $selectedCourses = Course::whereIn('id', $validated['course_ids'] ?? [])->lockForUpdate()->get();
                 foreach ($selectedCourses as $course) {
@@ -598,13 +613,15 @@ class InscriptionController extends Controller
 
                 if ($request->boolean('has_accompanist')) {
                     $accompanist = Accompanist::find($inscription->accompanist_id) ?? new Accompanist();
-                    $accompanist->fill(collect($validated)->only([
-                        'accompanist_name', 'accompanist_typedocument', 'accompanist_numdocument',
-                        'accompanist_phone', 'accompanist_solapin',
-                    ])->all());
+                    $accompanist->accompanist_name = $validated['accompanist_name'] ?? '';
+                    $accompanist->accompanist_typedocument = $validated['accompanist_typedocument'] ?? '';
+                    $accompanist->accompanist_numdocument = $validated['accompanist_numdocument'] ?? '';
+                    $accompanist->accompanist_phone = $validated['accompanist_phone'] ?? null;
+                    $accompanist->accompanist_solapin = $validated['accompanist_solapin'] ?? '';
                     $accompanist->save();
                     $inscription->accompanist_id = $accompanist->id;
                 } else {
+                    $accompanistToDelete = $inscription->accompanist_id;
                     $inscription->accompanist_id = null;
                     $validated['price_accompanist'] = 0;
                 }
@@ -622,11 +639,15 @@ class InscriptionController extends Controller
                 $tourTotal=collect($tourData)->sum(fn($row)=>$row['unit_price']+$row['accompanist_price']);
                 $inscription->total = $validated['price_category'] + $validated['price_accompanist'] + $courseTotal + $tourTotal;
                 $inscription->special_code = $validated['special_code'] ?? null;
-                $inscription->invoice = $validated['country'] === 'Perú' ? $validated['invoice'] : 'no';
-                $inscription->invoice_ruc = $needsInvoice() ? $validated['invoice_ruc'] : null;
-                $inscription->invoice_social_reason = $needsInvoice() ? $validated['invoice_social_reason'] : null;
-                $inscription->invoice_address = $needsInvoice() ? $validated['invoice_address'] : null;
+                $needsInvoice = ($validated['country'] ?? null) === 'Perú' && $validated['invoice'] === 'si';
+                $inscription->invoice = ($validated['country'] ?? null) === 'Perú' ? $validated['invoice'] : 'no';
+                $inscription->invoice_ruc = $needsInvoice ? ($validated['invoice_ruc'] ?? null) : null;
+                $inscription->invoice_social_reason = $needsInvoice ? ($validated['invoice_social_reason'] ?? null) : null;
+                $inscription->invoice_address = $needsInvoice ? ($validated['invoice_address'] ?? null) : null;
                 $inscription->payment_method = $validated['payment_method'];
+                if ($paymentMethodChanged && in_array($inscription->status, ['Pendiente', 'Procesando'], true)) {
+                    $inscription->status = $validated['payment_method'] === 'Tarjeta' ? 'Pendiente' : 'Procesando';
+                }
 
                 foreach (['document_file', 'voucher_file'] as $field) {
                     if (!$request->hasFile($field)) {
@@ -637,11 +658,16 @@ class InscriptionController extends Controller
                     $baseName = trim($baseName, '-') ?: 'archivo';
                     $fileName = $baseName . '_' . now()->format('YmdHis') . '.' . $file->extension();
                     $directory = $field === 'document_file' ? 'document_file' : 'voucher_file';
-                    $file->storeAs('public/uploads/'.$directory, $fileName);
+                    $storedPath = $file->storeAs('public/uploads/'.$directory, $fileName);
+                    $storedFiles[] = $storedPath;
+                    if (!empty($inscription->{$field})) {
+                        $replacedFiles[] = 'public/uploads/'.$directory.'/'.$inscription->{$field};
+                    }
                     $inscription->{$field} = $fileName;
                 }
 
                 $inscription->save();
+                if ($accompanistToDelete) Accompanist::whereKey($accompanistToDelete)->delete();
 
                 StatusNote::create([
                     'inscription_id' => $inscription->id,
@@ -649,7 +675,20 @@ class InscriptionController extends Controller
                     'note' => 'Corrección realizada por un administrador',
                     'user_id' => auth()->id(),
                 ]);
-            });
+                });
+            } catch (\Throwable $e) {
+                foreach ($storedFiles as $storedFile) Storage::delete($storedFile);
+                if ($e instanceof ValidationException) throw $e;
+                Log::error('Error al actualizar la inscripción.', [
+                    'inscription_id' => $inscription->id,
+                    'administrator_id' => auth()->id(),
+                    'error' => $e->getMessage(),
+                ]);
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'No se pudo actualizar la inscripción. Los datos ingresados se conservaron para que pueda intentarlo nuevamente.');
+            }
+            foreach ($replacedFiles as $replacedFile) Storage::delete($replacedFile);
 
             return redirect()->route('inscriptions.show', ['inscription' => $id])->with('success', 'Inscripción actualizada con éxito');
         }else{
@@ -1165,11 +1204,11 @@ class InscriptionController extends Controller
             $data_accompanist_id = null;
             if ($request->accompanist === 'si') {
                 $accompanist = new Accompanist();
-                $accompanist->accompanist_name = $request->accompanist_name;
-                $accompanist->accompanist_typedocument = $request->accompanist_typedocument;
-                $accompanist->accompanist_numdocument = $request->accompanist_numdocument;
+                $accompanist->accompanist_name = $request->accompanist_name ?? '';
+                $accompanist->accompanist_typedocument = $request->accompanist_typedocument ?? '';
+                $accompanist->accompanist_numdocument = $request->accompanist_numdocument ?? '';
                 $accompanist->accompanist_phone = $request->accompanist_phone;
-                $accompanist->accompanist_solapin = $request->accompanist_solapin;
+                $accompanist->accompanist_solapin = $request->accompanist_solapin ?? '';
                 $accompanist->save();
                 $data_accompanist_id = $accompanist->id;
             }
@@ -1233,6 +1272,7 @@ class InscriptionController extends Controller
             $statusNote->inscription_id = $inscription->id;
             $statusNote->action = 'Inscripción registrada manualmente';
             $statusNote->note = 'Registro creado por el administrador '.\Auth::user()->email;
+            $statusNote->user_id = \Auth::id();
             $statusNote->save();
 
             $datainscription = Inscription::join('category_inscriptions', 'inscriptions.category_inscription_id', '=', 'category_inscriptions.id')
@@ -1260,10 +1300,15 @@ class InscriptionController extends Controller
 
             return redirect()->route('inscriptions.index')->with('success', 'Inscripción realizada con éxito');
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack(); // Revertir la transacción en caso de error
-            Log::error('Error en el registro manual: '.$e->getMessage());
-            return redirect()->back()->with('error', 'Ocurrió un error al realizar la inscripción.');
+            Log::error('Error en el registro manual: '.$e->getMessage(), [
+                'administrator_id' => \Auth::id(),
+                'exception' => get_class($e),
+            ]);
+            return redirect()->back()
+                ->withInput($request->except(['password', 'password_confirmation']))
+                ->with('error', 'Ocurrió un error al realizar la inscripción. Los datos ingresados se conservaron para que pueda intentarlo nuevamente.');
         }
     }
 

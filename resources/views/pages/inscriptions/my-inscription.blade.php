@@ -36,6 +36,12 @@
     .payment-choice .payment-choice-icon { margin-bottom: 0 !important; }
     .payment-choice strong { font-size: .92rem; line-height: 1.2; }
     .payment-choice .badge { flex: 0 0 auto; margin-top: 0 !important; margin-left: auto; padding: .25rem .45rem; }
+    .billing-options { display: flex; flex-wrap: wrap; gap: .6rem; }
+    .billing-choice { display: inline-flex !important; align-items: center; gap: .5rem; margin: 0 !important; padding: .55rem .8rem; border: 1px solid #d8dde7; border-radius: 9px; background: #fff; }
+    .billing-choice .form-check-input { position: static !important; display: inline-block !important; flex: 0 0 auto; width: 18px !important; height: 18px !important; margin: 0 !important; border: 2px solid var(--inscription-primary) !important; border-radius: 50% !important; background-color: #fff !important; background-image: none !important; opacity: 1 !important; appearance: none !important; -webkit-appearance: none !important; }
+    .billing-choice .form-check-input:checked { background-color: var(--inscription-primary) !important; box-shadow: inset 0 0 0 3px #fff !important; }
+    .billing-choice .form-check-input:focus { box-shadow: 0 0 0 .2rem rgba(136,44,49,.16) !important; }
+    .billing-choice .form-check-input:checked + label { color: var(--inscription-primary); font-weight: 700; }
     .bank-payment-panel, .voucher-upload-panel { height: 100%; border: 1px solid #e5e9f2; border-radius: 12px; background: #fff; padding: .9rem; }
     .bank-payment-panel .bank-row { display: flex; justify-content: space-between; gap: 1rem; padding: .48rem 0; border-bottom: 1px solid #eef0f4; }
     .bank-payment-panel .bank-row:last-child { border-bottom: 0; }
@@ -250,12 +256,24 @@
                             @if(!empty($manualRegistration))
                                 <div class="col-md-6">
                                     <label for="password" class="form-label text-muted mb-0">{{ __('Contraseña') }} <span class="text-danger">*</span></label>
-                                    <input type="password" name="password" class="form-control" id="password" minlength="8" autocomplete="new-password" required>
+                                    <div class="input-group">
+                                        <input type="password" name="password" class="form-control" id="password" minlength="8" autocomplete="new-password" required>
+                                        <button class="btn btn-outline-secondary password-visibility-toggle" type="button" data-password-target="password" aria-label="Mostrar contraseña" aria-pressed="false">
+                                            <svg class="password-eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                            <svg class="password-eye-closed d-none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 3 18 18"></path><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"></path><path d="M9.9 4.2A10.8 10.8 0 0 1 12 4c6.5 0 10 8 10 8a17 17 0 0 1-2 3.1"></path><path d="M6.6 6.6C3.5 8.7 2 12 2 12s3.5 8 10 8a9.7 9.7 0 0 0 4.1-.9"></path></svg>
+                                        </button>
+                                    </div>
                                     {!!$errors->first("password", "<span class='text-danger'>:message</span>")!!}
                                 </div>
                                 <div class="col-md-6">
                                     <label for="password_confirmation" class="form-label text-muted mb-0">{{ __('Confirmar contraseña') }} <span class="text-danger">*</span></label>
-                                    <input type="password" name="password_confirmation" class="form-control" id="password_confirmation" minlength="8" autocomplete="new-password" required>
+                                    <div class="input-group">
+                                        <input type="password" name="password_confirmation" class="form-control" id="password_confirmation" minlength="8" autocomplete="new-password" required>
+                                        <button class="btn btn-outline-secondary password-visibility-toggle" type="button" data-password-target="password_confirmation" aria-label="Mostrar contraseña" aria-pressed="false">
+                                            <svg class="password-eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                            <svg class="password-eye-closed d-none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 3 18 18"></path><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"></path><path d="M9.9 4.2A10.8 10.8 0 0 1 12 4c6.5 0 10 8 10 8a17 17 0 0 1-2 3.1"></path><path d="M6.6 6.6C3.5 8.7 2 12 2 12s3.5 8 10 8a9.7 9.7 0 0 0 4.1-.9"></path></svg>
+                                        </button>
+                                    </div>
                                 </div>
                             @endif
 
@@ -469,26 +487,28 @@
 
                             <div class="col-md-12" id="dv_invoice">
                                 <div class="card px-3 py-3">
-                                    <label for="" class="form-label fw-bold">
-                                        {{ __('¿Necesita Factura?') }}
-
-                                    </label>
-                                    <div class="">
-                                        <div class="form-check form-check-primary form-check-inline">
-                                            <input class="form-check-input cursor-pointer" type="radio" name="invoice" id="invoice_no" value="no" @if(old('invoice', 'no') === 'no') checked @endif>
+                                    <div class="fw-bold text-dark">{{ __('Tipo de comprobante') }}</div>
+                                    <small class="text-muted d-block mb-2">{{ __('La factura está disponible únicamente para participantes de Perú.') }}</small>
+                                    <div class="billing-options">
+                                        <div class="form-check form-check-primary billing-choice">
+                                            <input class="form-check-input cursor-pointer" type="radio" name="invoice" id="invoice_no" value="no" @if(old('invoice', empty($manualRegistration) ? 'no' : null) === 'no') checked @endif required>
                                             <label class="form-check-label mb-0 cursor-pointer" for="invoice_no">
-                                                No
+                                                Boleta
                                             </label>
                                         </div>
-                                        <div class="form-check form-check-primary form-check-inline">
-                                            <input class="form-check-input cursor-pointer" type="radio" name="invoice" id="invoice_yes" value="si" @if(old('invoice') === 'si') checked @endif>
+                                        <div class="form-check form-check-primary billing-choice" id="invoice_yes_option">
+                                            <input class="form-check-input cursor-pointer" type="radio" name="invoice" id="invoice_yes" value="si" @if(old('invoice') === 'si') checked @endif required>
                                             <label class="form-check-label mb-0 cursor-pointer" for="invoice_yes">
-                                                Si
+                                                Factura
                                             </label>
                                         </div>
                                     </div>
 
                                     <div class="row mt-2 d-none" id="dv_invoice_info">
+                                        <div class="col-12 mb-1">
+                                            <div class="fw-semibold text-dark">{{ __('Datos para facturación') }}</div>
+                                            <small class="text-muted">{{ __('Complete los datos disponibles para emitir la factura.') }}</small>
+                                        </div>
                                         <div class="col-md-4">
                                             <label for="invoice_ruc" class="form-label fw-semibold mb-1">{{ __('RUC') }} @if(empty($manualRegistration)) <span class="text-danger">*</span> @endif</label>
                                             <input type="text" inputmode="numeric" name="invoice_ruc" id="invoice_ruc" class="form-control" value="{{ old('invoice_ruc') }}" placeholder="Ingrese 11 dígitos" minlength="11" maxlength="11" pattern="[0-9]{11}" autocomplete="off">

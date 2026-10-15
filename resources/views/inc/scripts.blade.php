@@ -92,6 +92,12 @@
             <script src="{{ asset('assets/js/apps/inscriptions/my-inscription.js') }}?v={{ config('app.version') }}"></script>
             @break
 
+        @case('inscriptions_edit')
+            <script src="{{ asset('plugins/src/filepond/filepond.min.js') }}"></script>
+            <script src="{{ asset('plugins/src/filepond/FilePondPluginFileValidateType.min.js') }}"></script>
+            <script src="{{ asset('plugins/src/filepond/filepondPluginFileValidateSize.min.js') }}"></script>
+            @break
+
         @case('inscriptions_rejects')
             {{-- Inscriptions --}}
             <script src="{{asset('plugins/src/table/datatable/datatables.js')}}"></script>

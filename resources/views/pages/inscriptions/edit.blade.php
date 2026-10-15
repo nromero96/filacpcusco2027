@@ -27,6 +27,12 @@
     .payment-choice.is-selected { border-color: var(--inscription-primary); background: var(--inscription-soft); }
     .payment-choice input { position: absolute; top: .65rem; right: .7rem; }
     .payment-choice strong { font-size: .9rem; line-height: 1.2; }
+    .billing-options { display: flex; flex-wrap: wrap; gap: .6rem; }
+    .billing-choice { display: inline-flex !important; align-items: center; gap: .5rem; margin: 0 !important; padding: .55rem .8rem; border: 1px solid #d8dde7; border-radius: 9px; background: #fff; }
+    .billing-choice .form-check-input { position: static !important; display: inline-block !important; flex: 0 0 auto; width: 18px !important; height: 18px !important; margin: 0 !important; border: 2px solid var(--inscription-primary) !important; border-radius: 50% !important; background-color: #fff !important; background-image: none !important; opacity: 1 !important; appearance: none !important; -webkit-appearance: none !important; }
+    .billing-choice .form-check-input:checked { background-color: var(--inscription-primary) !important; box-shadow: inset 0 0 0 3px #fff !important; }
+    .billing-choice .form-check-input:focus { box-shadow: 0 0 0 .2rem rgba(136,44,49,.16) !important; }
+    .billing-choice .form-check-input:checked + label { color: var(--inscription-primary); font-weight: 700; }
     .form-panel { border: 1px solid #e5e9f2; border-radius: 12px; padding: .85rem; background: #fff; }
     .inscription-shell .card { margin-bottom: 0; }
     .inscription-shell .table > :not(caption) > * > * { padding: .65rem .75rem; vertical-align: middle; }
@@ -139,7 +145,7 @@
                                 </div>
                                 <div class="col-md-4">
                                     <label for="lastname" class="form-label fw-bold mb-0">{{__("Apellido paterno")}}:</label>
-                                    <input type="text" class="form-control convert_mayus" name="lastname" id="lastname" value="{{ old('lastname', $inscription->user_lastname) }}" required>
+                                    <input type="text" class="form-control convert_mayus" name="lastname" id="lastname" value="{{ old('lastname', $inscription->user_lastname) }}">
                                 </div>
                                 <div class="col-md-4">
                                     <label for="second_lastname" class="form-label fw-bold mb-0">{{__("Apellido materno")}}:</label>
@@ -148,7 +154,8 @@
 
                                 <div class="col-md-4">
                                     <label for="document_type" class="form-label fw-bold mb-0">{{__("Tipo de documento")}}:</label>
-                                    <select class="form-select" name="document_type" id="document_type" required>
+                                    <select class="form-select" name="document_type" id="document_type">
+                                        <option value="">Seleccione...</option>
                                         @foreach(['DNI', 'Carnet de extranjería', 'Pasaporte'] as $documentType)
                                             <option value="{{ $documentType }}" @if(strtolower(old('document_type', $inscription->user_document_type)) === strtolower($documentType)) selected @endif>{{ $documentType }}</option>
                                         @endforeach
@@ -157,14 +164,15 @@
 
                                 <div class="col-md-4">
                                     <label for="document_number" class="form-label fw-bold mb-0">{{__("Número de documento")}}:</label>
-                                    <input type="text" class="form-control" name="document_number" id="document_number" value="{{ old('document_number', $inscription->user_document_number) }}" required>
+                                    <input type="text" class="form-control" name="document_number" id="document_number" value="{{ old('document_number', $inscription->user_document_number) }}">
                                 </div>
 
                                 <div class="col-md-4"></div>
 
                                 <div class="col-md-4">
                                     <label for="country" class="form-label fw-bold mb-0">{{__("País")}}:</label>
-                                    <select class="form-select" name="country" id="country" required>
+                                    <select class="form-select" name="country" id="country">
+                                        <option value="">Seleccione...</option>
                                         @foreach($countries as $country)
                                             <option value="{{ $country->name }}" @if(old('country', $inscription->user_country) === $country->name) selected @endif>{{ $country->name }}</option>
                                         @endforeach
@@ -173,38 +181,38 @@
 
                                 <div class="col-md-4">
                                     <label for="state" class="form-label fw-bold mb-0">{{__("Estado/Provincia")}}:</label>
-                                    <input type="text" class="form-control" name="state" id="state" value="{{ old('state', $inscription->user_state) }}" required>
+                                    <input type="text" class="form-control" name="state" id="state" value="{{ old('state', $inscription->user_state) }}">
                                 </div>
 
                                 <div class="col-md-4">
                                     <label for="city" class="form-label fw-bold mb-0">{{__("Distrito/Ciudad")}}:</label>
-                                    <input type="text" class="form-control" name="city" id="city" value="{{ old('city', $inscription->user_city) }}" required>
+                                    <input type="text" class="form-control" name="city" id="city" value="{{ old('city', $inscription->user_city) }}">
                                 </div>
 
                                 <div class="col-md-8">
                                     <label for="address" class="form-label fw-bold mb-0">{{__("Dirección")}}:</label>
-                                    <input type="text" class="form-control" name="address" id="address" value="{{ old('address', $inscription->user_address) }}" required>
+                                    <input type="text" class="form-control" name="address" id="address" value="{{ old('address', $inscription->user_address) }}">
                                 </div>
 
                                 <div class="col-md-4">
                                     <label for="postal_code" class="form-label fw-bold mb-0">{{__("Código Postal")}}:</label>
-                                    <input type="text" class="form-control" name="postal_code" id="postal_code" value="{{ old('postal_code', $inscription->user_postal_code) }}" required>
+                                    <input type="text" class="form-control" name="postal_code" id="postal_code" value="{{ old('postal_code', $inscription->user_postal_code) }}">
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold mb-0">{{__("Teléfono")}}:</label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" name="phone_code" value="{{ old('phone_code', $inscription->user_phone_code) }}" placeholder="+51" required>
-                                        <input type="text" class="form-control" name="phone_code_city" value="{{ old('phone_code_city', $inscription->user_phone_code_city) }}" placeholder="01" required>
-                                        <input type="text" class="form-control" name="phone_number" value="{{ old('phone_number', $inscription->user_phone_number) }}" placeholder="Número" required>
+                                        <input type="text" class="form-control" name="phone_code" value="{{ old('phone_code', $inscription->user_phone_code) }}" placeholder="+51">
+                                        <input type="text" class="form-control" name="phone_code_city" value="{{ old('phone_code_city', $inscription->user_phone_code_city) }}" placeholder="01">
+                                        <input type="text" class="form-control" name="phone_number" value="{{ old('phone_number', $inscription->user_phone_number) }}" placeholder="Número">
                                     </div>
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold mb-0">{{__("WhatsApp")}}:</label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" name="whatsapp_code" value="{{ old('whatsapp_code', $inscription->user_whatsapp_code) }}" placeholder="+51" required>
-                                        <input type="text" class="form-control" name="whatsapp_number" value="{{ old('whatsapp_number', $inscription->user_whatsapp_number) }}" placeholder="Número" required>
+                                        <input type="text" class="form-control" name="whatsapp_code" value="{{ old('whatsapp_code', $inscription->user_whatsapp_code) }}" placeholder="+51">
+                                        <input type="text" class="form-control" name="whatsapp_number" value="{{ old('whatsapp_number', $inscription->user_whatsapp_number) }}" placeholder="Número">
                                     </div>
                                 </div>
 
@@ -215,14 +223,14 @@
 
                                 <div class="col-md-4">
                                     <label for="workplace" class="form-label fw-bold mb-0">{{__("Centro de trabajo")}}:</label>
-                                    <input type="text" class="form-control" name="workplace" id="workplace" value="{{ old('workplace', $inscription->user_workplace) }}" required>
+                                    <input type="text" class="form-control" name="workplace" id="workplace" value="{{ old('workplace', $inscription->user_workplace) }}">
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold mb-0">{{__("Solapín/Gafete")}}:</label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control convert_mayus" name="solapin_name" value="{{ old('solapin_name', $inscription->user_solapin_name) }}" placeholder="Nombre" required>
-                                        <input type="text" class="form-control convert_mayus" name="solapin_lastname" value="{{ old('solapin_lastname', $inscription->user_solapin_lastname) }}" placeholder="Apellido" required>
+                                        <input type="text" class="form-control convert_mayus" name="solapin_name" value="{{ old('solapin_name', $inscription->user_solapin_name) }}" placeholder="Nombre">
+                                        <input type="text" class="form-control convert_mayus" name="solapin_lastname" value="{{ old('solapin_lastname', $inscription->user_solapin_lastname) }}" placeholder="Apellido">
                                     </div>
                                 </div>
 
@@ -283,7 +291,7 @@
                                         <label class="form-label mt-3">
                                         <span class="fw-bold">{{ __('Documento probatorio de categoría ') }} ({{ $inscription->category_inscription_name }}):</span></label><br>
                                         <div class="mt-1 d-flex">
-                                            @if ($inscription->document_file != null || $inscription->document_file != '')
+                                        @if (!empty($inscription->document_file))
                                             <a href="{{ asset('storage/uploads/document_file').'/'.$inscription->document_file}}" class="badge badge-light-primary text-start me-2 bs-tooltip" data-toggle="tooltip" data-placement="top" title="" data-bs-original-title="Descargar" target="_blank">
                                                 {{ $inscription->document_file }}
                                                 <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m7 10 5 5 5-5"></path><path d="M12 15V3"></path></svg>
@@ -299,7 +307,7 @@
                                             </span>
                                             @endif
                                         </div>
-                                        <div class="mt-1 d-block  @if($inscription->document_file != null || $inscription->document_file != '') d-none @endif" id="dv_document_file_upload">
+                                        <div class="mt-1 d-block @if(!empty($inscription->document_file)) d-none @endif" id="dv_document_file_upload">
                                             <label for="document_file" class="mb-0 d-block">Adjuntar documento probatorio de categoría</label>
                                             <input type="file" name="document_file" class="form-control form-control-sm mt-1 p-1" id="document_file" accept="application/pdf,image/jpeg,image/png">
                                         </div>
@@ -313,14 +321,14 @@
                                         </div>
 
                                         <div id="dv_accompanist" class="mt-3 @if(old('has_accompanist', $inscription->accompanist_id ? '1' : '0') == '1') @else d-none @endif">
-                                            <div class="fw-bold mb-2">{{ __('Complete los datos del acompañante') }}</div>
+                                            <div class="fw-bold mb-2">{{ __('Complete los datos disponibles del acompañante') }}</div>
                                             <div class="row g-3">
                                                 <div class="col-md-6">
-                                                    <label for="accompanist_name" class="form-label text-muted mb-0">{{__("Nombre completo")}} <span class="text-danger">*</span></label>
+                                                    <label for="accompanist_name" class="form-label text-muted mb-0">{{__("Nombre completo")}}</label>
                                                     <input type="text" name="accompanist_name" class="form-control" id="accompanist_name" value="{{ old('accompanist_name', $inscription->accompanist_name) }}" placeholder="Nombre y apellidos">
                                                 </div>
                                                 <div class="col-md-3">
-                                                    <label for="accompanist_typedocument" class="form-label text-muted mb-0">{{__("Tipo documento")}} <span class="text-danger">*</span></label>
+                                                    <label for="accompanist_typedocument" class="form-label text-muted mb-0">{{__("Tipo documento")}}</label>
                                                     <select class="form-select" name="accompanist_typedocument" id="accompanist_typedocument">
                                                         <option value="">Seleccione</option>
                                                         <option value="DNI" @if(old('accompanist_typedocument', $inscription->accompanist_typedocument) == 'DNI') selected @endif>DNI</option>
@@ -329,15 +337,15 @@
                                                     </select>
                                                 </div>
                                                 <div class="col-md-3">
-                                                    <label for="accompanist_numdocument" class="form-label text-muted mb-0">{{__("N° documento")}} <span class="text-danger">*</span></label>
+                                                    <label for="accompanist_numdocument" class="form-label text-muted mb-0">{{__("N° documento")}}</label>
                                                     <input type="text" name="accompanist_numdocument" class="form-control" id="accompanist_numdocument" value="{{ old('accompanist_numdocument', $inscription->accompanist_numdocument) }}" placeholder="N° documento">
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label for="accompanist_phone" class="form-label text-muted mb-0">{{__("Teléfono")}} <span class="text-danger">*</span></label>
+                                                    <label for="accompanist_phone" class="form-label text-muted mb-0">{{__("Teléfono")}}</label>
                                                     <input type="text" inputmode="tel" name="accompanist_phone" class="form-control" id="accompanist_phone" value="{{ old('accompanist_phone', $inscription->accompanist_phone) }}" placeholder="+51 987654321" maxlength="22" pattern="\+?[0-9 ()-]{7,22}">
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label for="accompanist_solapin" class="form-label text-muted mb-0">{{__("Solapín/Gafete")}} <span class="text-danger">*</span></label>
+                                                    <label for="accompanist_solapin" class="form-label text-muted mb-0">{{__("Solapín/Gafete")}}</label>
                                                     <input type="text" name="accompanist_solapin" class="form-control convert_mayus" id="accompanist_solapin" value="{{ old('accompanist_solapin', $inscription->accompanist_solapin) }}" placeholder="Solapín/Gafete">
                                                 </div>
                                             </div>
@@ -383,19 +391,24 @@
 
                                 <div class="col-md-12" id="dv_invoice">
                                     <div class="card px-3 py-3">
-                                        <label class="form-label fw-bold mb-1">{{ __('¿Necesita Factura?') }}</label>
-                                        <div class="mb-2">
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="invoice" id="invoice_no" value="no" @if(old('invoice', $inscription->invoice) !== 'si') checked @endif>
-                                                <label class="form-check-label" for="invoice_no">No</label>
+                                        <div class="fw-bold text-dark">{{ __('Tipo de comprobante') }}</div>
+                                        <small class="text-muted d-block mb-2">{{ __('La factura está disponible únicamente para participantes de Perú.') }}</small>
+                                        <div class="billing-options mb-2">
+                                            <div class="form-check billing-choice">
+                                                <input class="form-check-input" type="radio" name="invoice" id="invoice_no" value="no" @if(old('invoice', $inscription->invoice) === 'no') checked @endif required>
+                                                <label class="form-check-label" for="invoice_no">Boleta</label>
                                             </div>
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="invoice" id="invoice_yes" value="si" @if(old('invoice', $inscription->invoice) === 'si') checked @endif>
-                                                <label class="form-check-label" for="invoice_yes">Sí</label>
+                                            <div class="form-check billing-choice" id="invoice_yes_option">
+                                                <input class="form-check-input" type="radio" name="invoice" id="invoice_yes" value="si" @if(old('invoice', $inscription->invoice) === 'si') checked @endif required>
+                                                <label class="form-check-label" for="invoice_yes">Factura</label>
                                             </div>
                                         </div>
 
                                         <div class="row mt-1 @if(old('invoice', $inscription->invoice) !== 'si') d-none @endif" id="dv_invoice_info">
+                                            <div class="col-12 mb-1">
+                                                <div class="fw-semibold text-dark">{{ __('Datos para facturación') }}</div>
+                                                <small class="text-muted">{{ __('Complete los datos disponibles para emitir la factura.') }}</small>
+                                            </div>
                                             <div class="col-md-4">
                                                 <label for="invoice_ruc" class="form-label fw-bold mb-0">RUC:</label>
                                                 <input type="text" inputmode="numeric" class="form-control" name="invoice_ruc" id="invoice_ruc" minlength="11" maxlength="11" pattern="[0-9]{11}" autocomplete="off" value="{{ old('invoice_ruc', $inscription->invoice_ruc) }}">
@@ -433,7 +446,7 @@
                                             <div class="col-md-6"><label class="payment-choice" for="payment_method_card"><input class="form-check-input" type="radio" name="payment_method" value="Tarjeta" id="payment_method_card" @if(old('payment_method',$inscription->payment_method)==='Tarjeta') checked @endif required><strong class="pe-4">Tarjeta</strong></label></div>
                                         </div>
 
-                                        @if($inscription->voucher_file != null || $inscription->voucher_file != '')
+                                        @if(!empty($inscription->voucher_file))
                                             <div class="row mt-1">
                                                 <div class="col-md-12 d-flex">
                                                     <div class="mt-1">
@@ -451,7 +464,7 @@
                                             </div>
                                         @endif
 
-                                        <div class="mt-1 @if($inscription->voucher_file != null || $inscription->voucher_file != '') d-none @endif" id="dv_voucher_file">
+                                        <div class="mt-1 @if(!empty($inscription->voucher_file)) d-none @endif" id="dv_voucher_file">
                                             <label for="voucher_file" class="mb-0 d-block">Adjuntar comprobante de pago</label>
                                             <input type="file" name="voucher_file" class="form-control form-control-sm mt-1 p-1" id="voucher_file" accept="application/pdf,image/jpeg,image/png">
                                         </div>
@@ -602,7 +615,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const coursesTotal = document.getElementById('text_courses_total');
         if (coursesTotal) coursesTotal.textContent = coursesValue.toFixed(2);
         let toursValue = 0;
-        document.querySelectorAll('.tour-option').forEach(option => { const card=option.closest('[data-tour-card]'); const companion=card.querySelector('.tour-companion-option'); card.classList.toggle('border-primary',option.checked); card.querySelector('.tour-companion-control').classList.toggle('d-none',!option.checked); if(!option.checked) companion.checked=false; const fields=card.querySelector('.tour-companion-fields'); fields.classList.toggle('d-none',!option.checked||!companion.checked); fields.querySelectorAll('input,select').forEach(field=>field.required=option.checked&&companion.checked); if(option.checked){ toursValue+=parseFloat(option.dataset.tourPrice)||0; if(companion.checked)toursValue+=parseFloat(companion.dataset.companionPrice)||0; } });
+        document.querySelectorAll('.tour-option').forEach(option => { const card=option.closest('[data-tour-card]'); const companion=card.querySelector('.tour-companion-option'); card.classList.toggle('border-primary',option.checked); card.querySelector('.tour-companion-control').classList.toggle('d-none',!option.checked); if(!option.checked) companion.checked=false; const fields=card.querySelector('.tour-companion-fields'); fields.classList.toggle('d-none',!option.checked||!companion.checked); fields.querySelectorAll('input,select').forEach(field=>field.required=false); if(option.checked){ toursValue+=parseFloat(option.dataset.tourPrice)||0; if(companion.checked)toursValue+=parseFloat(companion.dataset.companionPrice)||0; } });
         const toursTotal=document.getElementById('text_tours_total'); if(toursTotal)toursTotal.textContent=toursValue.toFixed(2);
         const totalValue = categoryValue + accompanistValue + coursesValue + toursValue;
         total.value = totalValue;
@@ -631,11 +644,11 @@ document.addEventListener("DOMContentLoaded", function() {
         accompanist.addEventListener('change', (event) => {
         if (event.target.checked) {
             dvAccompanist.classList.remove('d-none');
-            accompanistName.setAttribute('required', 'required');
-            accompanistTypeDocument.setAttribute('required', 'required');
-            accompanistNumDocument.setAttribute('required', 'required');
-            accompanistPhone.setAttribute('required', 'required');
-            accompanistSolapin.setAttribute('required', 'required');
+            accompanistName.removeAttribute('required');
+            accompanistTypeDocument.removeAttribute('required');
+            accompanistNumDocument.removeAttribute('required');
+            accompanistPhone.removeAttribute('required');
+            accompanistSolapin.removeAttribute('required');
         } else {
             dvAccompanist.classList.add('d-none');
             priceAccompanist.value = 0;
@@ -659,7 +672,8 @@ document.addEventListener("DOMContentLoaded", function() {
         event.preventDefault();
         dvDocumentFileUpload.classList.toggle('d-none');
         if(!dvDocumentFileUpload.classList.contains('d-none')){
-            inputDocumentFile.value = '';
+            const pond = FilePond.find(inputDocumentFile);
+            if (pond) pond.removeFiles(); else inputDocumentFile.value = '';
         }
     });
 
@@ -672,26 +686,50 @@ document.addEventListener("DOMContentLoaded", function() {
         event.preventDefault();
         dvVoucherFile.classList.toggle('d-none');
         if(!dvVoucherFile.classList.contains('d-none')){
-            inputVoucherFile.value = '';
+            const pond = FilePond.find(inputVoucherFile);
+            if (pond) pond.removeFiles(); else inputVoucherFile.value = '';
         }
+    });
+
+    FilePond.registerPlugin(FilePondPluginFileValidateType, FilePondPluginFileValidateSize);
+    [inputDocumentFile, inputVoucherFile].forEach(input => {
+        if (!input) return;
+        FilePond.create(input, {
+            storeAsFile: true,
+            allowMultiple: false,
+            acceptedFileTypes: ['application/pdf', 'image/jpeg', 'image/png'],
+            maxFileSize: '10MB',
+            labelIdle: 'Arrastra y suelta el archivo o <span class="filepond--label-action">Selecciona</span>',
+            labelFileTypeNotAllowed: 'Formato de archivo no permitido',
+            fileValidateTypeLabelExpectedTypes: 'Usa PDF, JPG o PNG',
+            labelMaxFileSizeExceeded: 'El archivo supera el tamaño permitido',
+            labelMaxFileSize: 'Tamaño máximo: 10 MB',
+            labelFileProcessing: 'Preparando archivo',
+            labelFileProcessingComplete: 'Archivo listo',
+            labelTapToCancel: 'Cancelar',
+            labelTapToRetry: 'Reintentar',
+            labelTapToUndo: 'Quitar',
+        });
     });
 
     const country = document.getElementById('country');
     const invoiceNo = document.getElementById('invoice_no');
     const invoiceYes = document.getElementById('invoice_yes');
+    const invoiceYesOption = document.getElementById('invoice_yes_option');
     const invoiceContainer = document.getElementById('dv_invoice');
     const invoiceInfo = document.getElementById('dv_invoice_info');
     const invoiceFields = invoiceInfo.querySelectorAll('input');
 
     function updateInvoiceFields() {
         const isPeru = country.value === 'Perú';
-        invoiceContainer.classList.toggle('d-none', !isPeru);
+        invoiceContainer.classList.remove('d-none');
+        invoiceYesOption.classList.toggle('d-none', !isPeru);
         invoiceYes.disabled = !isPeru;
-        if (!isPeru) invoiceNo.checked = true;
+        if (!isPeru && invoiceYes.checked) invoiceYes.checked = false;
         const showFields = isPeru && invoiceYes.checked;
         invoiceInfo.classList.toggle('d-none', !showFields);
         invoiceFields.forEach(field => {
-            field.required = showFields;
+            field.required = false;
             if (!showFields && !isPeru) field.value = '';
         });
     }

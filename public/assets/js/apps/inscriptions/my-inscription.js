@@ -22,7 +22,20 @@ function clearFormError() {
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    
+    document.querySelectorAll('.password-visibility-toggle').forEach(button => {
+        button.addEventListener('click', function () {
+            const input = document.getElementById(this.dataset.passwordTarget);
+            if (!input) return;
+
+            const showPassword = input.type === 'password';
+            input.type = showPassword ? 'text' : 'password';
+            this.setAttribute('aria-pressed', showPassword ? 'true' : 'false');
+            this.setAttribute('aria-label', showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña');
+            this.querySelector('.password-eye-open')?.classList.toggle('d-none', showPassword);
+            this.querySelector('.password-eye-closed')?.classList.toggle('d-none', !showPassword);
+            input.focus({ preventScroll: true });
+        });
+    });
   
     const formInscription = document.getElementById("formInscription");
 
@@ -387,6 +400,7 @@ const inputInvoiceSocialReason = document.getElementById('invoice_social_reason'
 const inputInvoiceAddress = document.getElementById('invoice_address');
 const inputCountry = document.getElementById('inputCountry');
 const invoiceNo = document.getElementById('invoice_no');
+const invoiceYesOption = document.getElementById('invoice_yes_option');
 
 function updateInvoiceAvailability() {
     const selectedCategory = document.querySelector('input[type="radio"][name="category_inscription_id"]:checked');
@@ -396,10 +410,12 @@ function updateInvoiceAvailability() {
         && dv_payment.classList.contains('d-none');
     const canRequestInvoice = inputCountry.value === 'Perú' && !isValidatedFreeSpecialCode;
 
-    dv_invoice.classList.toggle('d-none', !canRequestInvoice);
+    dv_invoice.classList.remove('d-none');
+    invoiceYesOption.classList.toggle('d-none', !canRequestInvoice);
 
     if (!canRequestInvoice) {
-        invoiceNo.checked = true;
+        const invoiceYes = document.getElementById('invoice_yes');
+        if (invoiceYes.checked) invoiceYes.checked = false;
         inputInvoiceRuc.value = '';
         inputInvoiceSocialReason.value = '';
         inputInvoiceAddress.value = '';
@@ -432,7 +448,8 @@ inputInvoice.forEach(radio => {
 });
 
 function handleInvoice(){
-    const selectedValueInvoice = document.querySelector('input[type="radio"][name="invoice"]:checked').value;
+    const selectedInvoice = document.querySelector('input[type="radio"][name="invoice"]:checked');
+    const selectedValueInvoice = selectedInvoice ? selectedInvoice.value : null;
     if(selectedValueInvoice === 'si'){
         dvInvoiceInfo.classList.remove('d-none');
         inputInvoiceRuc.required = !isManualRegistration;
