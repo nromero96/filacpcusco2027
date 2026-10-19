@@ -2,6 +2,13 @@
 
 
 @section('content')
+<style>
+    .invoice-upload-card { border: 1px solid #e6eaf0; border-radius: 14px; box-shadow: 0 6px 18px rgba(31, 45, 61, .06); }
+    .invoice-upload-icon { width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; background: #eef2ff; color: #4361ee; flex: 0 0 auto; }
+    .invoice-file-row { display: flex; align-items: center; gap: .75rem; padding: .75rem; background: #f8f9fc; border: 1px solid #e6eaf0; border-radius: 10px; }
+    .invoice-file-name { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .invoice-delete-btn { width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; padding: 0; flex: 0 0 auto; }
+</style>
 
 
 <div class="layout-px-spacing">
@@ -427,14 +434,78 @@
 
                             <div class="col-md-5 text-end align-self-end">
 
-                                @if(\Auth::user()->hasRole('Administrador') || \Auth::user()->hasRole('Secretaria'))
+                                @if(\Auth::user()->hasRole('Administrador'))
+                                    <div class="card invoice-upload-card mb-3 text-start">
+                                        <div class="card-body p-3">
+                                            <div class="d-flex align-items-center gap-2 mb-3">
+                                                <span class="invoice-upload-icon">
+                                                    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M8 13h8M8 17h6"></path></svg>
+                                                </span>
+                                                <div>
+                                                    <h6 class="mb-0">Factura/Boleta del participante</h6>
+                                                    <small class="text-muted">Documento PDF · máximo 5 MB</small>
+                                                </div>
+                                            </div>
 
-                                    @if($inscription->status == 'Pagado' && $inscription->status_compr == 'Ninguna' )
-                                        <div id="actionbtncompr">
-                                            <a href="javascript:;" class="btn btn-primary mb-1 btnrequestcompr" data-inscription="{{ $inscription->id }}" >{{__("Emitir comprobante")}}</a>
+                                            @error('invoice_file')
+                                                <div class="alert alert-danger py-2 mb-2">{{ $message }}</div>
+                                            @enderror
+
+                                            @if(!empty($inscription->compr_pdf))
+                                                @php
+                                                    $invoiceName = $inscription->compr_pdf === 'T'
+                                                        ? (($inscription->num_compr ?: 'comprobante').'.pdf')
+                                                        : basename($inscription->compr_pdf);
+                                                    $invoiceUrl = $inscription->compr_pdf === 'T'
+                                                        ? asset('storage/uploads/comprobantes_file/'.$inscription->num_compr.'.pdf')
+                                                        : asset('storage/uploads/invoices/'.$inscription->compr_pdf);
+                                                @endphp
+                                                <div class="invoice-file-row">
+                                                    <a href="{{ $invoiceUrl }}" target="_blank" rel="noopener noreferrer" class="invoice-file-name text-info" title="{{ $invoiceName }}">
+                                                        {{ $invoiceName }}
+                                                    </a>
+                                                    <form action="{{ route('inscriptions.deleteinvoice', $inscription->id) }}" method="POST" onsubmit="return confirm('¿Deseas eliminar esta Factura/Boleta?');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-outline-danger invoice-delete-btn" title="Eliminar Factura/Boleta" aria-label="Eliminar Factura/Boleta">
+                                                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5M14 11v5"></path></svg>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            @else
+                                                <form action="{{ route('inscriptions.uploadinvoice', $inscription->id) }}" method="POST" enctype="multipart/form-data">
+                                                    @csrf
+                                                    <input type="file" name="invoice_file" class="form-control mb-2" accept="application/pdf,.pdf" required>
+                                                    <button type="submit" class="btn btn-primary w-100">Subir Factura/Boleta</button>
+                                                </form>
+                                            @endif
                                         </div>
-                                    @endif
+                                    </div>
+                                @elseif((int) \Auth::id() === (int) $inscription->user_id && !empty($inscription->compr_pdf))
+                                    @php
+                                        $participantInvoiceName = $inscription->compr_pdf === 'T'
+                                            ? (($inscription->num_compr ?: 'comprobante').'.pdf')
+                                            : basename($inscription->compr_pdf);
+                                        $participantInvoiceUrl = $inscription->compr_pdf === 'T'
+                                            ? asset('storage/uploads/comprobantes_file/'.$inscription->num_compr.'.pdf')
+                                            : asset('storage/uploads/invoices/'.$inscription->compr_pdf);
+                                    @endphp
+                                    <div class="card invoice-upload-card mb-3 text-start">
+                                        <div class="card-body p-3">
+                                            <h6 class="mb-2">Factura/Boleta</h6>
+                                            <div class="invoice-file-row">
+                                                <span class="invoice-file-name text-dark" title="{{ $participantInvoiceName }}">
+                                                    {{ $participantInvoiceName }}
+                                                </span>
+                                                <a href="{{ $participantInvoiceUrl }}" download class="btn btn-primary btn-sm">
+                                                    Descargar
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
 
+                                @if(\Auth::user()->hasRole('Administrador') || \Auth::user()->hasRole('Secretaria'))
                                     @if($inscription->status_compr == 'Pendiente' || $inscription->status_compr == 'Procesando')
                                         <span class="badge badge-light-warning">Generando Comprobante...</span>
                                     @endif
@@ -442,10 +513,9 @@
                                 @endif
 
                                 @if($inscription->status_compr == 'Informado')
-                                    <span class="badge badge-light-success">Comprobante Emitido: {{ $inscription->num_compr }}</span><br>
-                                    @if($inscription->compr_pdf == 'T')
-                                        <a href="{{ asset('storage/uploads/comprobantes_file').'/'.$inscription->num_compr.'.pdf'}}" target="_blank" class="text-info">{{__("PDF")}}</a>
-                                    @endif
+                                    <span class="badge badge-light-success">
+                                        Comprobante {{ $inscription->num_compr ? 'Emitido: '.$inscription->num_compr : 'cargado' }}
+                                    </span><br>
 
                                     @if($inscription->compr_xml == 'T')
                                         | <a href="{{ asset('storage/uploads/comprobantes_file').'/'.$inscription->num_compr.'.zip'}}" target="_blank" class="text-info">{{__("XML")}}</a>

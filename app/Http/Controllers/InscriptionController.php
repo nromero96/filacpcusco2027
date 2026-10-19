@@ -1681,6 +1681,84 @@ class InscriptionController extends Controller
         }
     }
 
+    public function uploadInvoice(Request $request, Inscription $inscription)
+    {
+        abort_unless($request->user()->hasRole('Administrador'), 403);
+
+        $validated = $request->validate([
+            'invoice_file' => ['required', 'file', 'mimes:pdf', 'max:5120'],
+        ], [
+            'invoice_file.required' => 'Selecciona la factura o boleta que deseas subir.',
+            'invoice_file.mimes' => 'El comprobante debe ser un archivo PDF.',
+            'invoice_file.max' => 'El comprobante no puede pesar más de 5 MB.',
+        ]);
+
+        $previousFile = $inscription->compr_pdf;
+        $filename = 'comprobante-'.$inscription->id.'-'.\Illuminate\Support\Str::uuid().'.pdf';
+        $storedPath = $validated['invoice_file']->storeAs('uploads/invoices', $filename, 'public');
+
+        try {
+            DB::transaction(function () use ($inscription, $filename) {
+                $inscription->compr_pdf = $filename;
+                $inscription->status_compr = 'Informado';
+                $inscription->save();
+
+                StatusNote::create([
+                    'inscription_id' => $inscription->id,
+                    'action' => 'Comprobante cargado por el administrador',
+                    'note' => 'Se cargó la factura/boleta en formato PDF.',
+                    'user_id' => auth()->id(),
+                ]);
+            });
+        } catch (\Throwable $exception) {
+            Storage::disk('public')->delete($storedPath);
+            Log::error('No se pudo guardar el comprobante de la inscripción.', [
+                'inscription_id' => $inscription->id,
+                'error' => $exception->getMessage(),
+            ]);
+
+            return back()->with('error', 'No se pudo guardar el comprobante. Inténtalo nuevamente.');
+        }
+
+        if ($previousFile && $previousFile !== 'T') {
+            Storage::disk('public')->delete('uploads/invoices/'.$previousFile);
+        }
+
+        return back()->with('success', 'Factura/Boleta cargada correctamente.');
+    }
+
+    public function deleteInvoice(Request $request, Inscription $inscription)
+    {
+        abort_unless($request->user()->hasRole('Administrador'), 403);
+
+        $filename = $inscription->compr_pdf;
+        if (!$filename) {
+            return back()->with('error', 'La inscripción no tiene una Factura/Boleta para eliminar.');
+        }
+
+        DB::transaction(function () use ($inscription) {
+            $inscription->compr_pdf = null;
+            if (!$inscription->compr_xml && !$inscription->compr_cdr && !$inscription->num_compr) {
+                $inscription->status_compr = 'Ninguna';
+            }
+            $inscription->save();
+
+            StatusNote::create([
+                'inscription_id' => $inscription->id,
+                'action' => 'Comprobante eliminado por el administrador',
+                'note' => 'Se eliminó la factura/boleta en formato PDF.',
+                'user_id' => auth()->id(),
+            ]);
+        });
+
+        $path = $filename === 'T'
+            ? 'uploads/comprobantes_file/'.$inscription->num_compr.'.pdf'
+            : 'uploads/invoices/'.$filename;
+        Storage::disk('public')->delete($path);
+
+        return back()->with('success', 'Factura/Boleta eliminada correctamente.');
+    }
+
 
     public function exportExcelInscriptions()
     {
