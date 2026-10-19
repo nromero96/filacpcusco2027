@@ -1524,9 +1524,15 @@ class InscriptionController extends Controller
 
         $approved = data_get($response, 'dataMap.ACTION_CODE') === '000'
             && data_get($response, 'dataMap.STATUS') === 'Authorized';
+        $actionCode = data_get($response, 'dataMap.ACTION_CODE')
+            ?: data_get($response, 'data.ACTION_CODE')
+            ?: data_get($response, 'errorCode')
+            ?: data_get($response, 'code');
         $description = data_get($response, 'dataMap.ACTION_DESCRIPTION')
             ?: data_get($response, 'data.ACTION_DESCRIPTION')
             ?: data_get($response, 'errorMessage')
+            ?: data_get($response, 'error.message')
+            ?: data_get($response, 'message')
             ?: 'La operación no pudo completarse.';
 
         if ($approved) {
@@ -1579,6 +1585,7 @@ class InscriptionController extends Controller
             'approved' => $approved,
             'inscription_id' => $inscription->id,
             'description' => $description,
+            'action_code' => $actionCode,
             'purchase_number' => $order['purchase_number'],
             'transaction_date' => data_get($response, 'dataMap.TRANSACTION_DATE') ?: data_get($response, 'data.TRANSACTION_DATE'),
             'card' => data_get($response, 'dataMap.CARD') ?: data_get($response, 'data.CARD'),

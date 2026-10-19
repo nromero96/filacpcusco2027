@@ -26,7 +26,13 @@
                                 <svg width="54" height="54" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v5"></path><path d="M12 16h.01"></path></svg>
                             </div>
                             <h3>No se pudo completar el pago</h3>
-                            <p class="text-muted">{{ $result['description'] ?? 'No recibimos una respuesta válida de Niubiz.' }}</p>
+                            <div class="alert alert-danger text-start mx-auto" role="alert" style="max-width: 480px;">
+                                <strong class="d-block mb-1">Motivo del rechazo</strong>
+                                <span>{{ $result['description'] ?? 'No recibimos una respuesta válida de Niubiz.' }}</span>
+                                @if(!empty($result['action_code']))
+                                    <small class="d-block mt-2">Código de respuesta: {{ $result['action_code'] }}</small>
+                                @endif
+                            </div>
                         @endif
 
                         @if($result)
