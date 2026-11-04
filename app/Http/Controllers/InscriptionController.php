@@ -1454,6 +1454,29 @@ class InscriptionController extends Controller
 
     }
 
+    private function formatNiubizTransactionDate($value): ?string
+    {
+        if (blank($value)) {
+            return null;
+        }
+
+        $value = trim((string) $value);
+
+        try {
+            if (preg_match('/^\d{12}$/', $value)) {
+                return Carbon::createFromFormat('ymdHis', $value)->format('d/m/Y H:i:s');
+            }
+
+            if (preg_match('/^\d{14}$/', $value)) {
+                return Carbon::createFromFormat('YmdHis', $value)->format('d/m/Y H:i:s');
+            }
+
+            return Carbon::parse($value)->format('d/m/Y H:i:s');
+        } catch (\Throwable $exception) {
+            return $value;
+        }
+    }
+
     public function confirmPaymentNiubiz(Request $request, Inscription $inscription)
     {
         abort_unless((int) $inscription->user_id === (int) auth()->id(), 403);
@@ -1534,10 +1557,18 @@ class InscriptionController extends Controller
             ?: data_get($response, 'error.message')
             ?: data_get($response, 'message')
             ?: 'La operación no pudo completarse.';
+        $transactionDate = data_get($response, 'dataMap.TRANSACTION_DATE')
+            ?: data_get($response, 'dataMap.TRANSACTIONDATE')
+            ?: data_get($response, 'data.TRANSACTION_DATE')
+            ?: data_get($response, 'data.TRANSACTIONDATE');
+        $currency = data_get($response, 'order.currency')
+            ?: data_get($response, 'dataMap.CURRENCY')
+            ?: data_get($response, 'data.CURRENCY')
+            ?: config('services.niubiz.currency');
 
         if ($approved) {
             $paymentCreated = false;
-            DB::transaction(function () use ($inscription, $response, $order, &$paymentCreated) {
+            DB::transaction(function () use ($inscription, $response, $order, $transactionDate, $currency, &$paymentCreated) {
                 $lockedInscription = Inscription::whereKey($inscription->id)->lockForUpdate()->firstOrFail();
                 if (Payment::where('inscription_id', $lockedInscription->id)->exists()) {
                     return;
@@ -1551,8 +1582,8 @@ class InscriptionController extends Controller
                     'card_brand' => data_get($response, 'dataMap.BRAND'),
                     'card_number' => data_get($response, 'dataMap.CARD'),
                     'amount' => data_get($response, 'order.amount', $order['amount']),
-                    'currency' => data_get($response, 'order.currency', config('services.niubiz.currency')),
-                    'transaction_date' => data_get($response, 'dataMap.TRANSACTION_DATE'),
+                    'currency' => $currency,
+                    'transaction_date' => $transactionDate,
                 ]);
 
                 $lockedInscription->update(['status' => 'Procesando']);
@@ -1587,11 +1618,12 @@ class InscriptionController extends Controller
             'description' => $description,
             'action_code' => $actionCode,
             'purchase_number' => $order['purchase_number'],
-            'transaction_date' => data_get($response, 'dataMap.TRANSACTION_DATE') ?: data_get($response, 'data.TRANSACTION_DATE'),
+            'transaction_date' => $transactionDate,
+            'transaction_date_formatted' => $this->formatNiubizTransactionDate($transactionDate),
             'card' => data_get($response, 'dataMap.CARD') ?: data_get($response, 'data.CARD'),
             'brand' => data_get($response, 'dataMap.BRAND') ?: data_get($response, 'data.BRAND'),
             'amount' => data_get($response, 'order.amount', $order['amount']),
-            'currency' => data_get($response, 'order.currency', config('services.niubiz.currency')),
+            'currency' => $currency,
         ]);
 
         $data = [

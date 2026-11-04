@@ -39,8 +39,9 @@
                             <div class="bg-light rounded p-3 text-start mx-auto mb-3" style="max-width: 480px;">
                                 <div class="d-flex justify-content-between gap-3 mb-2"><span class="text-muted">Inscripción</span><strong>#{{ $result['inscription_id'] }}</strong></div>
                                 <div class="d-flex justify-content-between gap-3 mb-2"><span class="text-muted">Pedido</span><strong>{{ $result['purchase_number'] }}</strong></div>
-                                @if($result['card'])<div class="d-flex justify-content-between gap-3 mb-2"><span class="text-muted">Tarjeta</span><strong>{{ $result['card'] }} {{ $result['brand'] ? '('.$result['brand'].')' : '' }}</strong></div>@endif
-                                <div class="d-flex justify-content-between gap-3"><span class="text-muted">Importe</span><strong>{{ $result['currency'] }} {{ number_format((float) $result['amount'], 2) }}</strong></div>
+                                @if(!empty($result['transaction_date']))<div class="d-flex justify-content-between gap-3 mb-2"><span class="text-muted">Fecha de transacción</span><strong class="text-end">{{ $result['transaction_date_formatted'] ?? $result['transaction_date'] }}</strong></div>@endif
+                                <div class="d-flex justify-content-between gap-3 mb-2"><span class="text-muted">Moneda</span><strong>{{ $result['currency'] }}</strong></div>
+                                <div class="d-flex justify-content-between gap-3"><span class="text-muted">Importe</span><strong>{{ number_format((float) $result['amount'], 2) }}</strong></div>
                             </div>
 
                             <div class="payment-result-actions d-flex flex-wrap justify-content-center gap-2">
