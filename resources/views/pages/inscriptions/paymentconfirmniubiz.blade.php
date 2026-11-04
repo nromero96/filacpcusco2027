@@ -40,6 +40,9 @@
                                 <div class="d-flex justify-content-between gap-3 mb-2"><span class="text-muted">Inscripción</span><strong>#{{ $result['inscription_id'] }}</strong></div>
                                 <div class="d-flex justify-content-between gap-3 mb-2"><span class="text-muted">Pedido</span><strong>{{ $result['purchase_number'] }}</strong></div>
                                 @if(!empty($result['transaction_date']))<div class="d-flex justify-content-between gap-3 mb-2"><span class="text-muted">Fecha de transacción</span><strong class="text-end">{{ $result['transaction_date_formatted'] ?? $result['transaction_date'] }}</strong></div>@endif
+                                @if($result['approved'])
+                                <div class="d-flex justify-content-between gap-3 mb-2"><span class="text-muted">Moneda</span><strong>{{ $result['currency'] }}</strong></div>
+                                @endif
                                 <div class="d-flex justify-content-between gap-3"><span class="text-muted">Importe</span><strong>{{ number_format((float) $result['amount'], 2) }}</strong></div>
                             </div>
 
