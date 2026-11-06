@@ -8,6 +8,40 @@
     .invoice-file-row { display: flex; align-items: center; gap: .75rem; padding: .75rem; background: #f8f9fc; border: 1px solid #e6eaf0; border-radius: 10px; }
     .invoice-file-name { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .invoice-delete-btn { width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; padding: 0; flex: 0 0 auto; }
+    .actionstatus { position: relative; overflow: hidden; padding: 1.25rem; border: 0; border-radius: 16px; color: #fff; background: linear-gradient(135deg, #4361ee 0%, #3048c8 100%); box-shadow: 0 12px 28px rgba(67, 97, 238, .25); }
+    .actionstatus::after { content: ''; position: absolute; width: 180px; height: 180px; right: -75px; top: -105px; border-radius: 50%; background: rgba(255, 255, 255, .09); pointer-events: none; }
+    .actionstatus-header, .actionstatus form { position: relative; z-index: 1; }
+    .actionstatus-icon { width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; border-radius: 12px; color: #fff; background: rgba(255, 255, 255, .16); border: 1px solid rgba(255, 255, 255, .22); }
+    .actionstatus-current { padding: .4rem .7rem; border-radius: 999px; color: #fff; background: rgba(255, 255, 255, .16); border: 1px solid rgba(255, 255, 255, .24); font-size: .78rem; font-weight: 700; white-space: nowrap; }
+    .actionstatus .form-label { color: rgba(255, 255, 255, .88); font-size: .78rem; font-weight: 600; margin-bottom: .35rem; }
+    .actionstatus .form-control { min-height: 44px; border: 1px solid rgba(255, 255, 255, .35); border-radius: 10px; background-color: #fff; color: #1b2559; box-shadow: none; }
+    .actionstatus .form-control:focus { border-color: #fff; box-shadow: 0 0 0 3px rgba(255, 255, 255, .2); }
+    .actionstatus-submit { min-height: 44px; width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: .4rem; border: 0; border-radius: 10px; background: #fff; color: #3048c8; font-weight: 700; }
+    .actionstatus-submit:hover, .actionstatus-submit:focus { background: #f2f4ff; color: #243aa9; }
+    .status-history-card { border: 1px solid #e6eaf0; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(31, 45, 61, .07); }
+    .status-history-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.1rem; border-bottom: 1px solid #edf0f5; background: linear-gradient(180deg, #fff 0%, #fafbff 100%); }
+    .status-history-title { display: flex; align-items: center; gap: .65rem; min-width: 0; }
+    .status-history-icon { width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; border-radius: 11px; color: #4361ee; background: #eef2ff; }
+    .status-history-count { padding: .3rem .6rem; border-radius: 999px; color: #4361ee; background: #eef2ff; font-size: .75rem; font-weight: 700; white-space: nowrap; }
+    .status-timeline { position: relative; margin: 0; padding: 1rem 1.1rem 1rem 2.75rem; list-style: none; }
+    .status-timeline::before { content: ''; position: absolute; left: 1.48rem; top: 1.35rem; bottom: 1.35rem; width: 2px; background: #e3e8f4; }
+    .status-timeline-item { position: relative; padding: 0 0 1rem .2rem; }
+    .status-timeline-item:last-child { padding-bottom: 0; }
+    .status-timeline-dot { position: absolute; width: 12px; height: 12px; left: -1.62rem; top: .32rem; border: 3px solid #fff; border-radius: 50%; background: #4361ee; box-shadow: 0 0 0 2px rgba(67, 97, 238, .2); }
+    .status-timeline-content { padding: .75rem .85rem; border: 1px solid #edf0f5; border-radius: 11px; background: #fafbfc; }
+    .status-timeline-note { color: #1b2559; font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
+    .status-timeline-meta { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-top: .35rem; color: #888ea8; font-size: .75rem; }
+    .status-history-empty { padding: 1.5rem 1rem; color: #888ea8; text-align: center; }
+    .status-history-toggle-wrap { display: flex; justify-content: center; padding: 0 1rem 1rem; }
+    .status-history-toggle { display: inline-flex; align-items: center; gap: .5rem; padding: .38rem .75rem .38rem .45rem; border: 1px solid #dfe5f2; border-radius: 999px; background: #fff; color: #4361ee; font-size: .78rem; font-weight: 700; transition: .2s ease; }
+    .status-history-toggle:hover, .status-history-toggle:focus { border-color: #4361ee; background: #f4f6ff; color: #3048c8; }
+    .status-history-toggle-symbol { width: 25px; height: 25px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: #4361ee; color: #fff; font-size: 1.15rem; font-weight: 400; line-height: 1; }
+    @media (max-width: 575.98px) {
+        .actionstatus { padding: 1rem; }
+        .actionstatus-header { align-items: flex-start !important; }
+        .actionstatus-current { margin-top: .15rem; }
+        .status-timeline-meta { align-items: flex-start; flex-direction: column; gap: .2rem; }
+    }
 </style>
 
 
@@ -378,13 +412,26 @@
 
                             <div class="col-md-7">
 
-                                @if ($inscription->status_compr != 'Informado' && (\Auth::user()->hasRole('Administrador') || \Auth::user()->hasRole('Secretaria')))
-                                    <div class="card px-3 py-3 bg-primary mb-2 actionstatus">
-                                        <label class="form-label mb-1 text-white"><span class="fw-bold">{{ __('Estado de la inscripción') }}</span>: <span>({{ $inscription->status }})</span></label>
-                                        <form class="row" action="{{ route('inscriptions.updatestatus', ['id' => $inscription->id]) }}" id="formstatus" method="POST">
+                                @if (\Auth::user()->hasRole('Administrador'))
+                                    <div class="card actionstatus mb-3">
+                                        <div class="actionstatus-header d-flex justify-content-between align-items-center gap-3 mb-3">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="actionstatus-icon">
+                                                    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                                                </span>
+                                                <div>
+                                                    <h6 class="text-white mb-0">{{ __('Estado de la inscripción') }}</h6>
+                                                    <small style="color: rgba(255,255,255,.72);">Actualiza el estado y registra una nota</small>
+                                                </div>
+                                            </div>
+                                            <span class="actionstatus-current">{{ $inscription->status }}</span>
+                                        </div>
+
+                                        <form class="row g-2 align-items-end" action="{{ route('inscriptions.updatestatus', ['id' => $inscription->id]) }}" id="formstatus" method="POST">
                                             @csrf
                                             @method('PUT')
                                             <div class="col-md-4">
+                                                <label for="action" class="form-label">Nuevo estado</label>
                                                 <select name="action" id="action" class="form-control">
                                                     <option value="Pendiente" @if ($inscription->status == 'Pendiente') selected @endif >{{ __('Pendiente') }}</option>
                                                     <option value="Procesando" @if ($inscription->status == 'Procesando') selected @endif>{{ __('Procesando') }}</option>
@@ -393,10 +440,14 @@
                                                 </select>
                                             </div>
                                             <div class="col-md-5">
-                                                <input type="text" class="form-control" name="note" id="note" placeholder="Nota...">
+                                                <label for="note" class="form-label">Nota administrativa</label>
+                                                <input type="text" class="form-control" name="note" id="note" placeholder="Escribe una nota opcional">
                                             </div>
                                             <div class="col-md-3">
-                                                <button type="submit" class="btn btn-secondary">{{ __('Actualizar') }}</button>
+                                                <button type="submit" class="btn actionstatus-submit">
+                                                    <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+                                                    {{ __('Actualizar') }}
+                                                </button>
                                             </div>
                                         </form>
                                     </div>
@@ -417,22 +468,80 @@
 
                                 @endif
 
-                                <div class="card p-2">
-                                    <ul class="mb-0">
-                                        @foreach ($statusnotes as $item)
-                                            <li>
-                                                <b class="text-info">{!! $item->note !!}</b> ({{ $item->created_at }})<br>
-                                                <small>{{ $item->action }}</small>
-                                            </li>
-                                        @endforeach
-                                    </ul>
+                                <div class="card status-history-card">
+                                    <div class="status-history-header">
+                                        <div class="status-history-title">
+                                            <span class="status-history-icon">
+                                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+                                            </span>
+                                            <div>
+                                                <h6 class="mb-0">Historial de cambios</h6>
+                                                <small class="text-muted">Actividad de la inscripción</small>
+                                            </div>
+                                        </div>
+                                        <span class="status-history-count">{{ $statusnotes->count() }} {{ $statusnotes->count() === 1 ? 'registro' : 'registros' }}</span>
+                                    </div>
+
+                                    @if($statusnotes->isNotEmpty())
+                                        <ul class="status-timeline">
+                                            @foreach ($statusnotes as $item)
+                                                <li class="status-timeline-item{{ $loop->first ? '' : ' status-history-extra d-none' }}">
+                                                    <span class="status-timeline-dot" aria-hidden="true"></span>
+                                                    <div class="status-timeline-content">
+                                                        <div class="status-timeline-note">{{ $item->note }}</div>
+                                                        <div class="status-timeline-meta">
+                                                            <span>{{ $item->action }}</span>
+                                                            <time datetime="{{ $item->created_at->toIso8601String() }}">{{ $item->created_at->format('d/m/Y H:i') }}</time>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                        @if($statusnotes->count() > 1)
+                                            <div class="status-history-toggle-wrap">
+                                                <button type="button" class="status-history-toggle" id="statusHistoryToggle" aria-expanded="false">
+                                                    <span class="status-history-toggle-symbol" aria-hidden="true">+</span>
+                                                    <span class="status-history-toggle-text">Ver {{ $statusnotes->count() - 1 }} {{ ($statusnotes->count() - 1) === 1 ? 'cambio anterior' : 'cambios anteriores' }}</span>
+                                                </button>
+                                            </div>
+                                        @endif
+                                    @else
+                                        <div class="status-history-empty">
+                                            <svg width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                                            <p class="mb-0 mt-2">Todavía no hay cambios registrados.</p>
+                                        </div>
+                                    @endif
                                 </div>
+
+                                @if($statusnotes->count() > 1)
+                                    <script>
+                                        document.addEventListener('DOMContentLoaded', function () {
+                                            const toggle = document.getElementById('statusHistoryToggle');
+                                            if (!toggle) return;
+
+                                            const extraItems = document.querySelectorAll('.status-history-extra');
+                                            const symbol = toggle.querySelector('.status-history-toggle-symbol');
+                                            const text = toggle.querySelector('.status-history-toggle-text');
+                                            const hiddenCount = extraItems.length;
+
+                                            toggle.addEventListener('click', function () {
+                                                const expanded = this.getAttribute('aria-expanded') === 'true';
+                                                extraItems.forEach(item => item.classList.toggle('d-none', expanded));
+                                                this.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+                                                symbol.textContent = expanded ? '+' : '−';
+                                                text.textContent = expanded
+                                                    ? `Ver ${hiddenCount} ${hiddenCount === 1 ? 'cambio anterior' : 'cambios anteriores'}`
+                                                    : 'Mostrar solo el último cambio';
+                                            });
+                                        });
+                                    </script>
+                                @endif
 
                             </div>
 
 
 
-                            <div class="col-md-5 text-end align-self-end">
+                            <div class="col-md-5 text-end align-self-start">
 
                                 @if(\Auth::user()->hasRole('Administrador'))
                                     <div class="card invoice-upload-card mb-3 text-start">

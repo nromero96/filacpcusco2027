@@ -1726,8 +1726,22 @@ class InscriptionController extends Controller
         ]);
 
         $previousFile = $inscription->compr_pdf;
-        $filename = 'comprobante-'.$inscription->id.'-'.\Illuminate\Support\Str::uuid().'.pdf';
+        $originalBaseName = pathinfo($validated['invoice_file']->getClientOriginalName(), PATHINFO_FILENAME);
+        $safeBaseName = preg_replace('/[\x00-\x1F\x7F<>:"\/\\\\|?*]+/u', '-', $originalBaseName);
+        $safeBaseName = trim((string) $safeBaseName, " .-_\t\n\r\0\x0B");
+        $safeBaseName = \Illuminate\Support\Str::limit($safeBaseName ?: 'comprobante', 180, '');
+
+        $filename = $safeBaseName.'.pdf';
+        $correlative = 1;
+        while (Storage::disk('public')->exists('uploads/invoices/'.$filename)) {
+            $filename = $safeBaseName.'-'.$correlative.'.pdf';
+            $correlative++;
+        }
+
         $storedPath = $validated['invoice_file']->storeAs('uploads/invoices', $filename, 'public');
+        if (!$storedPath) {
+            return back()->with('error', 'No se pudo guardar el archivo. Inténtalo nuevamente.');
+        }
 
         try {
             DB::transaction(function () use ($inscription, $filename) {
