@@ -15,23 +15,23 @@ class CreateWorksTable extends Migration
     {
         Schema::create('works', function (Blueprint $table) {
             $table->id();
-            $table->string('knowledge_area');
-            $table->string('category');
-            $table->string('author_coauthors')->nullable();
-            $table->string('institution')->nullable();
             $table->unsignedBigInteger('user_id');
-            $table->string('title')->nullable();
-            $table->text('description')->nullable();
-            $table->string('file_1')->nullable();
-            $table->string('file_2')->nullable();
-            $table->string('file_3')->nullable();
-            $table->string('file_4')->nullable();
-            $table->string('file_5')->nullable();
-            $table->string('file_6')->nullable();
-            $table->string('status');
-            $table->string('comment')->nullable();
-            $table->unsignedBigInteger('user_id_calificador')->nullable();
+            $table->string('first_name');
+            $table->string('last_name');
+            $table->string('email');
+            $table->string('whatsapp_phone', 30);
+            $table->string('current_position');
+            $table->string('institution');
+            $table->string('city', 120);
+            $table->string('country', 120);
+            $table->string('title');
+            $table->string('area', 80);
+            $table->string('area_other')->nullable();
+            $table->text('abstract');
+            $table->string('status', 30)->default('Enviado');
             $table->timestamps();
+
+            $table->index('user_id');
         });
     }
 

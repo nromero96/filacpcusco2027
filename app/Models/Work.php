@@ -10,28 +10,30 @@ class Work extends Model
     use HasFactory;
 
     protected $fillable = [
-        'knowledge_area',
-        'category',
-        'author_coauthors',
-        'institution',
         'user_id',
+        'first_name',
+        'last_name',
+        'email',
+        'whatsapp_phone',
+        'current_position',
+        'institution',
+        'city',
+        'country',
         'title',
-        'description',
-        'references',
-        'file_1',
-        'file_2',
-        'file_3',
-        'file_4',
-        'file_5',
-        'file_6',
+        'area',
+        'area_other',
+        'abstract',
         'status',
-        'user_id_calificador',
-        'qualification',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function statusNotes()
+    {
+        return $this->hasMany(WorksNote::class)->latest('id');
     }
 
 }

@@ -24,7 +24,6 @@ use App\Http\Controllers\NoteController;
 use App\Http\Controllers\CountryStateController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\ProgramSessionController;
-use App\Http\Controllers\PosterController;
 use App\Http\Controllers\GafeteController;
 use App\Http\Controllers\CertificadoController;
 use App\Http\Controllers\FileManagerController;
@@ -80,8 +79,6 @@ Route::post('verificar-clave-pagina', [FileManagerController::class, 'verificarC
 
 Route::post('store-online-register-file', [FileManagerController::class, 'storeOnlineRegisterFile'])->name('filemanager.storeonlinefile');
 
-//Search Online Posters
-Route::get('online-search-posters', [PosterController::class, 'searchPostersPage'])->name('searchPostersPage');
 
 //routes for user login
 Route::group(['middleware' => ['auth', 'check.inscription','ensureStatusActive']], function () {
@@ -114,9 +111,6 @@ Route::group(['middleware' => ['auth', 'check.inscription','ensureStatusActive']
         Artisan::call('storage:link');
         return 'Storage link creado correctamente en cpanel.';
     });
-
-    //Search Online Posters
-    Route::get('online-search-posters', [PosterController::class, 'searchPostersPage'])->name('searchPostersPage');
 
     // $this->middleware
     Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard.index');
@@ -168,19 +162,9 @@ Route::group(['middleware' => ['auth', 'check.inscription','ensureStatusActive']
     Route::resource('hotelreservations', HotelReservationController::class)->names('hotelreservations');
 
     //Works
-    Route::resource('works', WorkController::class)->names('works');
-    Route::delete('/delete-file/{workId}/{fileNumber}', [WorkController::class, 'deleteFile'])->name('works.deletefile');
-    Route::get('works-rejects', [WorkController::class, 'indexRejects'])->name('works.rejects');
-    Route::put('works/{id}/update-status', [WorkController::class, 'updateStatus'])->name('works.updatestatus');
+    Route::put('works/{work}/status', [WorkController::class, 'updateStatus'])->name('works.updatestatus');
+    Route::resource('works', WorkController::class)->except(['destroy'])->names('works');
     Route::get('/exportar-excel-works', [WorkController::class, 'exportExcelWorks'])->name('works.exportexcel');
-    Route::put('sendmail-workaccepted/{id}', [WorkController::class, 'sendMailWorkAccepted'])->name('works.sendmailworkaccepted');
-
-    //Posters
-    Route::resource('posters', PosterController::class)->names('posters');
-    //poster.upload
-    Route::post('/upload-poster-file', [PosterController::class, 'uploadPosterFile'])->name('posters.uploadfile');
-    Route::delete('/delete-poster-file/{posterId}/', [PosterController::class, 'deletePosterFile'])->name('posters.deletefile');
-    Route::put('/confirm-poster-file/{posterId}/', [PosterController::class, 'confirmPosterFile'])->name('posters.confirmfile');
 
 
     //ExhibitorsController

@@ -23,7 +23,7 @@ class UploadController extends Controller
         $uploadedFolders = []; // Utilizamos un arreglo para almacenar las carpetas de archivos subidos
 
         // Campos de archivo único
-        $singleFileFields = ['file_1', 'file_2', 'file_3', 'file_4', 'file_5', 'file_6','document_file','voucher_file','poster'];
+        $singleFileFields = ['document_file', 'voucher_file'];
 
         foreach ($singleFileFields as $field) {
             if ($request->hasFile($field)) {

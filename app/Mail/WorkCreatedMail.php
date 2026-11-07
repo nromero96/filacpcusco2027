@@ -29,6 +29,9 @@ class WorkCreatedMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Trabajo Registrado: '.$this->work->title)->view('emails.work_created');
+        $name = trim($this->work->first_name.' '.$this->work->last_name);
+
+        return $this->subject('TRABAJO #'.$this->work->id.' - Registrado ('.$name.')')
+            ->view('emails.work_created');
     }
 }

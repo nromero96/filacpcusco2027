@@ -48,28 +48,9 @@
 
             @break
 
-        @case('works_rejects')
-            {{-- Works --}}
-            <link rel="stylesheet" type="text/css" href="{{asset('plugins/src/table/datatable/datatables.css')}}">
-            <link rel="stylesheet" type="text/css" href="{{asset('plugins/css/light/table/datatable/dt-global_style.css')}}">
-            <link rel="stylesheet" type="text/css" href="{{asset('plugins/css/dark/table/datatable/dt-global_style.css')}}">
-            <link rel="stylesheet" type="text/css" href="{{asset('plugins/css/light/table/datatable/custom_dt_custom.css')}}">
-
-            <link rel="stylesheet" type="text/css" href="{{asset('assets/css/light/apps/works-list.css')}}">
-            <link rel="stylesheet" type="text/css" href="{{asset('assets/css/dark/apps/works-list.css')}}">
-            @break
-
         @case('works_create')
-            {{-- Works --}}
-            <link href="{{ asset('plugins/src/filepond/filepond.min.css') }}" rel="stylesheet" type="text/css" />
-            <link href="{{ asset('plugins/css/light/filepond/custom-filepond.css') }}" rel="stylesheet" type="text/css" />
-            <link href="{{ asset('plugins/css/dark/filepond/custom-filepond.css') }}" rel="stylesheet" type="text/css" />
             @break
         @case('works_edit')
-            {{-- Works --}}
-            <link href="{{ asset('plugins/src/filepond/filepond.min.css') }}" rel="stylesheet" type="text/css" />
-            <link href="{{ asset('plugins/css/light/filepond/custom-filepond.css') }}" rel="stylesheet" type="text/css" />
-            <link href="{{ asset('plugins/css/dark/filepond/custom-filepond.css') }}" rel="stylesheet" type="text/css" />
             @break
 
         @case('inscriptions')

@@ -63,7 +63,7 @@ if (!function_exists('setTitle')) :
         elseif ($page_name === 'works'):
             echo __('Trabajos') . $admin_name;
         elseif ($page_name === 'works_create'):
-            echo __('Regitrar Trabajo') . $admin_name;
+            echo __('Registrar Trabajo') . $admin_name;
         elseif ($page_name === 'works_edit'):
             echo __('Editar Trabajo') . $admin_name;
         elseif ($page_name === 'works_show'):
