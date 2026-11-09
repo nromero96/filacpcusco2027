@@ -29,8 +29,15 @@ if (Auth::check()) {
         // Excluye las rutas que ya manejan redirección o permiten acciones específicas
         $allowedRoutes = ['inscriptions.myinscription', 'inscriptions.storemyinscription', 'specialcodes.validatespecialcode'];
 
+        // Permite registrar y consultar trabajos sin exigir una inscripción al evento.
+        // El controlador de Works mantiene la autorización sobre trabajos ajenos
+        // y las acciones exclusivas de administradores.
+        if ($request->routeIs('works.*')) {
+            return $next($request);
+        }
+
         // Si la ruta actual es una de las permitidas, deja que continúe sin redirigir
-        if (in_array($request->route()->getName(), $allowedRoutes)) {
+        if (in_array($request->route()->getName(), $allowedRoutes, true)) {
             return $next($request);
         }
 

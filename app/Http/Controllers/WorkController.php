@@ -183,7 +183,7 @@ class WorkController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => ['required', 'string', 'max:120'],
             'last_name' => ['required', 'string', 'max:180'],
-            'whatsapp_phone' => ['required', 'regex:/^\+[0-9\s\-()]+$/', new PhoneNumber],
+            'whatsapp_phone' => ['required', new PhoneNumber],
             'current_position' => ['required', 'string', 'max:255'],
             'institution' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:120'],
@@ -193,7 +193,6 @@ class WorkController extends Controller
             'area_other' => ['nullable', 'required_if:area,OTROS', 'string', 'max:255'],
             'abstract' => ['required', 'string'],
         ], [
-            'whatsapp_phone.regex' => 'El teléfono de WhatsApp debe comenzar con el código de país, por ejemplo +51.',
             'area_other.required_if' => 'Especifica el área del trabajo.',
         ], [
             'first_name' => 'nombre',

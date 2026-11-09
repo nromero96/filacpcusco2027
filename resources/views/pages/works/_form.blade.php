@@ -70,8 +70,8 @@
             </div>
             <div class="col-md-6">
                 <label for="whatsapp_phone" class="form-label text-muted mb-0">Teléfono de contacto WhatsApp</label>
-                <input type="tel" name="whatsapp_phone" id="whatsapp_phone" class="form-control" value="{{ old('whatsapp_phone', $work->whatsapp_phone ?? $defaultWhatsapp) }}" placeholder="+51 999 999 999" maxlength="30" required>
-                <small class="text-muted">Incluye el código de país, por ejemplo: +51.</small>
+                <input type="tel" name="whatsapp_phone" id="whatsapp_phone" class="form-control" value="{{ old('whatsapp_phone', $work->whatsapp_phone ?? $defaultWhatsapp) }}" placeholder="51 999 999 999" maxlength="30" required>
+                <small class="text-muted">Incluye el código de país y el número. El signo + es opcional.</small>
             </div>
             <div class="col-md-6">
                 <label for="current_position" class="form-label text-muted mb-0">Cargo o posición actual</label>
